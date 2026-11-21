@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="bn"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MikroTik Script Studio Pro · Upgrade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet">
+
+<!-- Modern Animation & Excel Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/motion@11.11.13/dist/motion.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+
+<style>
+:root{
+  --bg:#edf1f6;--sf:rgba(255,255,255,0.88);--sf-solid:#ffffff;--sf2:#f0f3f8;
+  --tx:#0e1a2b;--mu:#64748b;--bd:rgba(225,231,239,0.9);--ac:#0d9488;--ac2:#0284c7;
+  --on:#fff;--ok:#12a36b;--wr:#b86e00;--code:#0b1220;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --sh:0 4px 20px rgba(15,27,45,.06),0 10px 30px rgba(15,27,45,.08);
+  --glow:0 0 20px rgba(13,148,136,.22);
+}
+:root[data-theme=dark]{
+  --bg:#060b14;--sf:rgba(15,24,38,0.84);--sf-solid:#0f1826;--sf2:#172336;
+  --tx:#e6edf7;--mu:#8397b1;--bd:rgba(34,49,73,0.85);--ac:#2dd4bf;--ac2:#38bdf8;
+  --on:#04201c;--wr:#f2b84b;--code:#040810;
+  --sh:0 4px 24px rgba(0,0,0,.45),0 12px 36px rgba(0,0,0,.5);
+  --glow:0 0 24px rgba(45,212,191,.18);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow-x:hidden}
+body{
+  font:14px/1.55 "Plus Jakarta Sans","Hind Siliguri","Segoe UI","Nirmala UI",system-ui,sans-serif;
+  background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased;
+  position:relative;
+}
+
+/* Three.js Ambient Background Canvas */
+#bg-canvas{
+  position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.55;
+}
+
+.app{
+  position:relative;z-index:1;
+  display:grid;grid-template-columns:278px minmax(0,1fr) 348px;gap:14px;padding:14px;height:100%;
+}
+.side,.basket{
+  background:var(--sf);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--bd);border-radius:18px;box-shadow:var(--sh);
+  padding:16px;display:flex;flex-direction:column;gap:10px;min-height:0;overflow:hidden;
+  transition:border-color .25s ease, box-shadow .25s ease;
+}
+.side:hover,.basket:hover{border-color:color-mix(in srgb,var(--ac) 35%,var(--bd))}
+main{min-height:0;overflow:auto;padding:2px 6px 0 2px;display:flex;flex-direction:column;scroll-behavior:smooth}
+main>*{flex-shrink:0}
+
+.brand{display:flex;gap:10px;align-items:center;font-weight:700;font-size:16px;line-height:1.2}
+.brand small{display:block;font-size:12px;font-weight:400;color:var(--mu)}
+.logo{
+  width:38px;height:38px;border-radius:12px;
+  background:linear-gradient(135deg,var(--ac),var(--ac2));
+  color:var(--on);display:grid;place-items:center;font-size:18px;
+  box-shadow:var(--glow);position:relative;overflow:hidden;
+}
+#lottie-brand{width:34px;height:34px;display:grid;place-items:center}
+
+.mu{color:var(--mu)}.note{font-size:12px;color:var(--mu)}
+.srch{position:relative}
+.srch kbd{position:absolute;right:9px;top:8px;font:11px var(--mono);color:var(--mu);background:var(--sf-solid);border:1px solid var(--bd);border-radius:6px;padding:0 6px}
+nav{flex:1;min-height:0;overflow:auto;margin:0 -6px;padding:0 6px}
+nav h4{display:flex;align-items:center;gap:8px;margin:14px 0 4px;font-size:12px;color:var(--mu);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+nav h4 i{width:8px;height:8px;border-radius:3px;box-shadow:0 0 8px currentColor}
+nav h4 span{margin-left:auto;font-weight:400}
+
+.nv{
+  display:block;width:100%;text-align:left;background:none;border:0;color:var(--tx);
+  padding:8px 12px;border-radius:10px;cursor:pointer;font:inherit;
+  transition:transform .18s cubic-bezier(.22,1,.36,1), background .18s ease, color .18s ease;
+}
+.nv:hover{background:var(--sf2);transform:translateX(4px)}
+.nv.on{
+  background:linear-gradient(90deg,color-mix(in srgb,var(--ac) 18%,transparent),color-mix(in srgb,var(--ac2) 8%,transparent));
+  color:var(--ac);font-weight:600;border-left:3px solid var(--ac);
+}
+.nv u{color:var(--wr);text-decoration:none;font-size:10px}
+.sfoot{display:grid;gap:8px}
+
+.b{
+  background:linear-gradient(135deg,var(--ac),color-mix(in srgb,var(--ac) 80%,var(--ac2)));
+  color:var(--on);border:0;border-radius:10px;padding:8px 14px;cursor:pointer;
+  font:inherit;font-weight:600;position:relative;overflow:hidden;
+  transition:transform .16s cubic-bezier(.22,1,.36,1), filter .16s ease, box-shadow .2s ease;
+}
+.b:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:var(--glow)}
+.b:active{transform:scale(.97)}
+.b.g{background:var(--sf2);color:var(--tx);font-weight:500;box-shadow:none}
+.b.g:hover{background:color-mix(in srgb,var(--ac) 12%,var(--sf2));color:var(--ac)}
+.b.d{background:linear-gradient(135deg,#e11d48,#be123c);color:#fff}
+.b.sm{padding:5px 10px;font-size:12px;border-radius:8px}
+
+input,select,textarea{
+  width:100%;background:var(--sf2);color:var(--tx);border:1px solid transparent;
+  border-radius:10px;padding:9px 11px;font:inherit;
+  transition:border-color .18s,background .18s,box-shadow .18s,transform .15s;
+}
+input:focus,select:focus,textarea:focus{
+  outline:0;border-color:var(--ac);background:var(--sf-solid);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 25%,transparent);
+}
+button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+textarea{font-family:var(--mono);font-size:12.5px;resize:vertical}
+
+header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin:6px 0 16px}
+h1{margin:4px 0 0;font-size:24px;letter-spacing:-.01em;background:linear-gradient(90deg,var(--tx),var(--ac));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+header p{margin:2px 0 0}
+.pill{
+  display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+  color:var(--ac);background:color-mix(in srgb,var(--ac) 14%,transparent);
+  border:1px solid color-mix(in srgb,var(--ac) 25%,transparent);
+  border-radius:999px;padding:2px 10px;
+}
+
+.card{
+  background:var(--sf);backdrop-filter:blur(12px);
+  border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:var(--sh);
+  transition:border-color .2s ease, transform .2s ease;
+}
+.card:hover{border-color:color-mix(in srgb,var(--ac) 30%,var(--bd))}
+.ch{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.en{width:24px;height:24px;border-radius:8px;background:var(--ac);color:var(--on);display:grid;place-items:center;font-size:12px;font-weight:700}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-left:8px}
+.chip{
+  border:1px solid var(--bd);background:var(--sf2);color:var(--tx);border-radius:999px;
+  padding:2px 12px;cursor:pointer;font:inherit;font-size:12px;
+  transition:all .16s ease;
+}
+.chip:hover{border-color:var(--ac);color:var(--ac);transform:translateY(-1px)}
+.x{margin-left:auto;background:none;border:0;color:var(--mu);cursor:pointer;font-size:16px;border-radius:8px;padding:2px 8px}
+.x:hover{background:var(--sf2);color:#e11d48}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.wide{grid-column:1/-1}
+label span{display:block;font-size:12px;color:var(--mu);margin-bottom:4px;font-weight:600}em{font-style:normal;font-weight:400;opacity:.8}
+
+/* Command Toggle Control Bar */
+.cmd-ctrl{
+  background:color-mix(in srgb,var(--sf2) 75%,var(--sf-solid));
+  border:1px dashed color-mix(in srgb,var(--ac) 40%,var(--bd));
+  border-radius:12px;padding:10px 14px;margin-bottom:12px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.cmd-ctrl-title{font-size:12px;font-weight:700;color:var(--ac);display:flex;align-items:center;justify-content:space-between}
+.cmd-toggles{display:flex;flex-wrap:wrap;gap:8px}
+.cmd-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:6px 11px;border-radius:9px;font-size:12px;font-family:var(--mono);
+  border:1px solid var(--bd);background:var(--sf-solid);color:var(--tx);
+  cursor:pointer;transition:all .18s cubic-bezier(.22,1,.36,1);
+  max-width:100%;
+}
+.cmd-btn:hover{border-color:var(--ac);transform:translateY(-1px)}
+.cmd-btn.on{
+  background:color-mix(in srgb,var(--ac) 16%,var(--sf-solid));
+  border-color:var(--ac);color:var(--ac);font-weight:600;
+  box-shadow:0 2px 10px color-mix(in srgb,var(--ac) 18%,transparent);
+}
+.cmd-btn.off{
+  opacity:0.52;text-decoration:line-through;background:var(--sf2);color:var(--mu);
+}
+.cmd-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;
+  background:var(--mu);transition:background .18s, box-shadow .18s;
+}
+.cmd-btn.on .cmd-dot{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.cmd-txt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:340px}
+
+/* Category Selector & Manual Input Combo */
+.cat-wrap{display:flex;gap:6px;align-items:center}
+.cat-wrap select{flex:1;min-width:115px}
+.cat-wrap input{flex:1.2;min-width:120px}
+
+.pv{position:sticky;bottom:0;margin-top:auto;background:var(--code);border-radius:14px;overflow:hidden;box-shadow:0 -14px 18px var(--bg),var(--sh);border:1px solid rgba(45,212,191,.2)}
+.pvh{display:flex;gap:10px;align-items:center;padding:9px 14px;color:#9db4cf;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.06)}.pvh b{color:#e6edf7}
+#warn{color:#f2b84b;flex:1;font-size:12px}.tg{display:flex;gap:6px;align-items:center;font-size:12px;cursor:pointer}.tg input{width:auto}
+pre{margin:0;padding:8px 16px 14px;color:#c4f5e4;font:13px/1.65 var(--mono);white-space:pre-wrap;word-break:break-all;min-height:44px;max-height:38vh;overflow:auto}
+.basket textarea{flex:1;min-height:200px;resize:none;font-size:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+dialog{border:1px solid var(--bd);border-radius:18px;background:var(--sf-solid);color:var(--tx);width:min(920px,95vw);max-height:92vh;padding:0;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+dialog::backdrop{background:rgba(4,9,20,.65);backdrop-filter:blur(5px)}
+.dl{padding:20px;display:grid;gap:12px}.dh{display:flex;align-items:center}.dh h2{margin:0;font-size:19px}
+.g3{display:grid;grid-template-columns:1.2fr 1.4fr 1.2fr;gap:10px}
+.ft{width:100%;border-collapse:collapse;font-size:13px}.ft th{text-align:left;color:var(--mu);font-weight:600;padding:6px 6px;border-bottom:1px solid var(--bd)}.ft td{padding:6px 6px;vertical-align:middle;border-bottom:1px solid color-mix(in srgb,var(--bd) 50%,transparent)}
+.ft tr.fx td:not(:nth-child(3)){opacity:.5}.ex{font:12px var(--mono);color:var(--mu);word-break:break-all;max-width:220px}
+.help{font-size:12px;color:var(--mu);background:var(--sf2);border-radius:10px;padding:8px 12px}.help code{font-family:var(--mono)}
+details summary{cursor:pointer;color:var(--mu);font-size:13px;margin-bottom:8px}
+.dpv{background:var(--code);border-radius:12px;overflow:hidden}.dpv b{display:block;padding:8px 14px 0;color:#9db4cf;font-size:12px}.dpv pre{max-height:200px}
+
+.toast{
+  position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,var(--ok),#059669);color:#fff;
+  padding:9px 20px;border-radius:20px;z-index:999;box-shadow:0 10px 25px rgba(18,163,107,.35);
+  font-weight:600;font-size:13px;
+}
+
+@media(max-width:1000px){.app{grid-template-columns:1fr;height:auto}main{overflow:visible}.pv{position:static}.g3{grid-template-columns:1fr}}
+[hidden]{display:none!important}
+
+.lg{position:fixed;inset:0;display:grid;place-items:center;background:transparent;padding:20px;z-index:50;overflow:auto}
+.lgc{
+  width:min(430px,100%);background:var(--sf);backdrop-filter:blur(20px);
+  border:1px solid var(--bd);border-radius:22px;box-shadow:0 20px 50px rgba(0,0,0,.25);
+  padding:28px;display:grid;gap:14px;position:relative;z-index:2;
+}
+.lgc h2{margin:0;font-size:18px}.err{color:#e11d48;font-size:13px;min-height:18px;font-weight:500}
+.lnk{background:none;border:0;color:var(--ac);cursor:pointer;font:inherit;font-size:12.5px;text-decoration:underline;font-weight:600}
+
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--bd);flex-wrap:wrap}
+.tab{background:none;border:0;border-bottom:2px solid transparent;color:var(--mu);padding:8px 14px;cursor:pointer;font:inherit;font-weight:600;transition:color .15s}.tab.on{color:var(--ac);border-color:var(--ac)}
+.usr{display:flex;align-items:center;gap:8px;justify-content:space-between;font-size:13px;padding-top:4px}.usr small{display:block;color:var(--mu);font-size:11px}
+.sub{margin:4px 0 4px 26px}.app.nobk{grid-template-columns:278px minmax(0,1fr)}
+h3{margin:14px 0 6px;font-size:14px}.dl details{background:var(--sf2);border-radius:10px;padding:8px 12px;margin:4px 0}.dl summary{margin:0;color:var(--tx);font-weight:600}.dl details[open] summary{margin-bottom:8px}
+
+.xl-badge{
+  display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;
+  padding:3px 9px;border-radius:8px;background:rgba(16,185,129,.14);color:#10b981;
+  border:1px solid rgba(16,185,129,.3);
+}
+.xl-badge.warn{background:rgba(245,158,11,.14);color:#f59e0b;border-color:rgba(245,158,11,.3)}
+.upd-btn{
+  background:linear-gradient(135deg,#0284c7,#0d9488);
+  color:#fff;border:0;border-radius:10px;padding:8px 12px;cursor:pointer;
+  font:inherit;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;
+  box-shadow:0 4px 14px rgba(2,132,199,.28);transition:all .18s ease;
+}
+.upd-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.upd-btn.dirty{
+  background:linear-gradient(135deg,#f59e0b,#ea580c);
+  box-shadow:0 4px 16px rgba(245,158,11,.38);
+  animation:pulseWarn 2s infinite;
+}
+@keyframes pulseWarn{
+  0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.45)}
+  50%{box-shadow:0 0 0 6px rgba(245,158,11,0)}
+}
+
+/* Pro Upgrade Workbench */
+.upgrade-status{font-size:11px;color:var(--mu);padding:4px 8px;border:1px solid var(--bd);border-radius:8px;background:var(--sf2);text-align:center}
+.tool-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.tool-card{border:1px solid var(--bd);border-radius:12px;background:var(--sf2);padding:12px;min-width:0}
+.tool-card h3{margin:0 0 8px;font-size:14px}.tool-card textarea{min-height:110px}
+.tool-output{background:var(--code);color:#b7f7d4;border-radius:10px;padding:12px;white-space:pre-wrap;word-break:break-word;font:12px/1.6 var(--mono);max-height:340px;overflow:auto}
+.tool-kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.tool-kpi div{background:var(--sf2);border:1px solid var(--bd);padding:10px;border-radius:10px;text-align:center}
+.tool-kpi b{display:block;font-size:20px;color:var(--ac)}.tool-kpi small{color:var(--mu)}
+.tool-list{max-height:260px;overflow:auto;border:1px solid var(--bd);border-radius:10px;padding:8px}
+.tool-row{display:flex;gap:6px;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);flex-wrap:wrap}
+@media(max-width:1000px){.tool-grid{grid-template-columns:1fr}.tool-kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.app{padding:8px;gap:8px}.side,.basket{padding:12px;border-radius:14px}header{flex-direction:column}h1{font-size:21px}.tool-card{padding:10px}}
+
+
+.devbrand{color:var(--ac)!important;font-weight:700!important;letter-spacing:.02em;font-size:11px!important;margin-top:2px}
+#proBtn{background:linear-gradient(135deg,var(--ac),var(--ac2));color:var(--on);font-weight:700}
+.pro-compact>section:nth-child(n+3):not(.pro-favorites){display:none!important}
+.pro-output{display:none!important}
+.side>.brand .logo #lottie-brand{display:none!important}
+.side>.brand .logo:after{content:"⚡";font-size:21px;color:white;filter:drop-shadow(0 1px 1px rgba(0,0,0,.2))}
+#login .brand .logo{width:52px;height:52px;border-radius:16px;background:linear-gradient(145deg,#0d9488,#0284c7);box-shadow:0 12px 24px rgba(2,132,199,.24);font-size:22px}
+#login .brand .logo:before{content:'◆';font-size:19px;color:white;transform:rotate(45deg);opacity:.95}
+#login .brand .logo #lottie-brand{display:none}
+#login .brand .logo{font-size:0!important}
+#login .brand .logo:before{content:'⚡';font-size:24px;color:#fff;filter:drop-shadow(0 1px 1px rgba(0,0,0,.2)}
+
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+
+<div class="app" id="app" hidden="">
+  <aside class="side">
+    <div class="brand">
+      <span class="logo"><span id="lottie-brand">⚡</span></span>
+      <div>Script Studio<small>MikroTik RouterOS v7 · Pro</small></div>
+    </div>
+    <div class="srch"><input id="q" placeholder="Template খুঁজুন…"><kbd>Ctrl K</kbd></div>
+    <nav id="nav"></nav>
+    <div class="sfoot">
+      <button class="b" id="newT">＋ Template builder</button>
+      <button class="b g" id="proBtn" hidden>🧰 Pro Tools</button>
+      <button class="upd-btn" id="updHtmlBtn" title="যেকোনো পরিবর্তনের পর মূল HTML ফাইলটি সিলেক্ট করে সরাসরি আপডেট করুন">💾 Update HTML File</button>
+      <div class="upgrade-status" id="saveStatus">● Local autosave active · HTML sync pending</div><button class="b g sm" id="ackHtmlSync" hidden>✓ Downloaded HTML replace করেছি</button>
+      <div class="row">
+        <button class="b g" id="adm" style="flex:1">⚙ Admin</button>
+        <button class="b g" id="theme" style="flex:1">◐ Theme</button>
+      </div>
+      <div class="usr"><div id="uchip"></div><button class="b g sm" id="lo">Logout</button></div>
+    </div>
+  </aside>
+  <main id="main"></main>
+  <aside class="basket" id="bkp">
+    <div class="brand"><span class="logo">▤</span><div>Script basket<small id="bc"></small></div></div>
+    <textarea id="bk" spellcheck="false" placeholder="একাধিক template-এর script এখানে জমা হবে। এখান থেকেই edit করা যায়।"></textarea>
+    <div class="row"><button class="b" id="bcopy">Copy</button><button class="b g" id="bsave">Save .rsc</button><button class="b g" id="bclr">Clear</button></div>
+    <div class="note">Winbox/SSH-এ paste করার আগে Safe Mode অন রাখুন। অথবা .rsc router-এ upload করে: /import file-name=setup.rsc</div>
+  </aside>
+</div>
+<dialog id="dlg"></dialog>
+<div id="login" class="lg" hidden=""></div>
+
+<script type="application/json" id="seed">{"v":3,"rev":63,"packVer":2,"users":[{"u":"faridul","name":"Master","salt":"0fcc1c360fccb275a3ff66c4","hash":"4020892f85082a28803cb790bd68ce15e846d33fe9795ec91442388df6bae008","role":"master","active":true,"canCreate":false,"canCopy":true,"canSave":true,"canBasket":true,"maxE":10,"createdAt":"2026-11-20","allow":{"all":false,"cats":[],"ids":[],"cmdToggleAll":false,"cmdToggleIds":[]}},{"u":"riyadul","role":"user","name":"Riyadul Boss","salt":"286c8d4ceb1903d55ae10795","hash":"b058aff5eebfabf02ebd3f3a2609d340bc5e0e5115879888b796552efdad8668","active":true,"allow":{"all":true,"cats":[],"ids":[],"cmdToggleAll":false,"cmdToggleIds":["vlan-add","site-access","pppoe-ip","cmwnspj93","cmwnsqs7t","cmwor7ayr","cmwovon5g"]},"canCreate":false,"canCopy":true,"canSave":false,"canBasket":true,"maxE":20,"status":"active","created":"2026-11-20T08:48:34.987Z","tg":{"all":false,"cats":[],"ids":[]},"createdAt":"2026-11-20"},{"u":"dolfin","name":"Boss","role":"user","status":"active","created":"2026-11-20T08:56:08.299Z","salt":"1feead6ea69d79615053fd3f","hash":"bce9a5033858b7538b16acddb22ab1b8d1b6858ac8664d84cd2593dac31bd15b","allow":{"all":true,"cats":[],"ids":[],"cmdToggleAll":false,"cmdToggleIds":[]},"tg":{"all":false,"cats":[],"ids":[]},"canCreate":true,"canCopy":true,"canSave":true,"canBasket":true,"maxE":20,"active":true,"createdAt":"2026-11-20"}],"tpls":[{"id":"vlan-add","cat":"VLAN","name":"VLAN Add","desc":"নতুন VLAN interface তৈরি / also Add IP","body":"/interface/vlan/add name={{name=Vlan}} vlan-id={{id=1010}} interface={{iface=10G-SFP+}}{? comment=\"{{comment}}\"?}\n\n/ip/address/add address={{addr}} interface={{int=Vlan}}{? comment=\"{{comment}}\"?}","labels":{"name":"VLAN name","id":"VLAN ID","iface":"Parent interface","int":"Interface"},"presets":{},"mo":false,"src":"builtin","owner":"master","pv":2,"mod":true},{"id":"vlan-iface","cat":"VLAN","name":"VLAN Interface Change","desc":"VLAN-এর parent interface পরিবর্তন","labels":{"name":"VLAN name","iface":"New parent interface"},"body":"/interface/vlan/set [find name={{name}}] interface={{iface}}","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"vlan-state","cat":"VLAN","name":"VLAN Disable / Enable / Remove","desc":"এক বা একাধিক VLAN একসাথে","labels":{"names":"VLAN names"},"body":"/interface/vlan/{{action=disable|enable|remove}} {{names*}}","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"vlan-edit","cat":"VLAN","name":"VLAN ID / Name Change","desc":"বিদ্যমান VLAN-এর আইডি বা নাম বদল","labels":{"name":"Current name","id":"New VLAN ID","newname":"New name"},"body":"/interface/vlan/set [find name={{name}}] vlan-id={{id}} name={{newname}}","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"vlan-view","cat":"VLAN","name":"VLAN List / Export","desc":"তালিকা দেখা বা script export","body":"/interface/vlan/{{action=print|export}}","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"vlan-find","cat":"VLAN","name":"VLAN Find / Comment","desc":"ID দিয়ে খোঁজা এবং comment যোগ","labels":{"id":"VLAN ID (খোঁজার জন্য)","name":"VLAN name (comment-এর জন্য)"},"body":"/interface/vlan/find vlan-id={{id}}\n/interface/vlan/comment numbers={{name}} comment=\"{{comment}}\"","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"ip-add","cat":"IP Address","name":"IP Add","desc":"নতুন IP address যোগ","body":"/ip/address/add address={{addr}} interface={{iface=ether1}}{? comment=\"{{comment}}\"?}","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"ip-state","cat":"IP Address","name":"IP Disable / Enable / Remove","desc":"এক বা একাধিক IP","body":"/ip/address/{{action=disable|enable|remove}} [find address=\"{{addr*}}\"]","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"ip-edit","cat":"IP Address","name":"IP / Interface Edit","desc":"IP বা interface এডিট","labels":{"addr":"Current address","new":"New address"},"body":"/ip/address/set [find address=\"{{addr}}\"] address={{new}} interface={{iface}}","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"ip-comment","cat":"IP Address","name":"IP Comment","desc":"Comment যোগ বা পরিবর্তন","body":"/ip/address/comment [find address=\"{{addr}}\"] comment=\"{{comment}}\"","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"olt-full","cat":"New_Link","name":"OLT Full Set (Web+Telnet+SNMP+SSH)","desc":"এক OLT-এর চারটি forward একসাথে","body":"/ip/firewall/nat/add chain=dstnat action=dst-nat to-addresses={{to}} to-ports=80 protocol=tcp dst-address={{pub}} dst-port={{p-web=1020}} comment=\"Main-olt\"\n/ip/firewall/nat/add chain=dstnat action=dst-nat to-addresses={{to}} to-ports=23 protocol=tcp dst-address={{pub}} dst-port={{p-telnet=1011}} comment=\"Telnet\"\n/ip/firewall/nat/add chain=dstnat action=dst-nat to-addresses={{to}} to-ports=161 protocol=udp dst-address={{pub}} dst-port={{p-snmp=1012}} comment=\"SNMP\"\n/ip/firewall/nat/add chain=dstnat action=dst-nat to-addresses={{to}} to-ports=22 protocol=tcp dst-address={{pub}} dst-port={{p-ssh=1013}} comment=\"SSH\"","labels":{"to":"OLT IP","pub":"Public IP","p-web":"Public port: Web","p-telnet":"Public port: Telnet","p-snmp":"Public port: SNMP","p-ssh":"Public port: SSH"},"presets":{},"mo":false,"src":"builtin","owner":"master","pv":2,"mod":true},{"id":"dns-redirect","cat":"NAT / Port-Forward","name":"DNS Redirect","desc":"TCP + UDP 53 অন্য DNS-এ redirect","body":"/ip/firewall/nat/add action=dst-nat chain=dstnat dst-port=53 protocol=tcp to-addresses={{dns=8.8.8.8}} to-ports=53{? place-before={{pos=2}}?}\n/ip/firewall/nat/add action=dst-nat chain=dstnat dst-port=53 protocol=udp to-addresses={{dns}} to-ports=53{? place-before={{pos}}?}","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"nat-set","cat":"NAT / Port-Forward","name":"NAT Rule Modify","desc":"যে field গুলো দেবেন শুধু সেগুলোই বদলাবে","labels":{"num":"Rule number","to":"to-addresses","toport":"to-ports","pub":"dst-address","pubport":"dst-port","list":"dst-address-list"},"body":"/ip/firewall/nat/set {{num}}{? to-addresses={{to}}?}{? to-ports={{toport}}?}{? dst-address={{pub}}?}{? dst-port={{pubport}}?}{? dst-address-list={{list}}?}","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"nat-comment","cat":"NAT / Port-Forward","name":"NAT Comment","desc":"Rule-এ comment","labels":{"num":"Rule number"},"body":"/ip/firewall/nat/comment {{num}} comment=\"{{comment}}\"","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"blackhole","cat":"Routing / BGP","name":"Blackhole Route","desc":"এক বা একাধিক network","labels":{"dst":"Destination (IP বা IP/prefix)"},"body":"/ip/route/add dst-address={{dst*}} blackhole","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"rfilter","cat":"Routing / BGP","name":"Route Filter Rule (accept)","desc":"/routing/filter/rule-এ accept rule","labels":{"dst":"Destination","chain":"Chain","pos":"Place-before"},"body":"/routing/filter/rule/add chain={{chain=OUT}} rule=\"if (dst == {{dst*}}) { accept; }\"{? place-before={{pos=11}}?}","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"q-find","cat":"Queue","name":"Queue Find","desc":"Queue-এর নাম দিয়ে detail দেখা","body":"/queue/simple/print detail where name=\"{{name=IX-Bkp-VENUS}}\"","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"q-target","cat":"Queue","name":"Queue Target Set (IP Add / Delete)","desc":"একাধিক queue-তে একই target list বসানো। পুরো list replace হয়, তাই পুরো তালিকা দিন","labels":{"names":"Queue names","target":"Target list (comma দিয়ে)"},"body":"/queue/simple/set [find name=\"{{names*=BDIX-VENUS|FNA-VENUS|IX-VENUS}}\"] target={{target}}","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"site-access","cat":"New IP Allow","name":"New IP: Site Access","desc":"নতুন IP loopback-এ বসিয়ে নির্দিষ্ট site-এ src-nat","labels":{"ip":"New IP (mask ছাড়া)","sites":"Site IPs","loop":"Loopback interface","fpos":"Filter place-before","npos":"NAT place-before"},"body":"/ip/firewall/address-list/add list=BGP-Networks address={{ip}}/32\n/ip/address/add address={{ip}}/32 interface={{loop=Loopback}}\n/routing/filter/rule/add chain=OUT rule=\"if (dst == {{ip}}/32) { accept; }\" place-before={{fpos=11}}\n/ip/firewall/address-list/add list=site-access address={{sites*}}\n/ip/firewall/nat/add chain=srcnat action=src-nat to-addresses={{ip}} dst-address-list=site-access place-before={{npos=2}}","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"pppoe-ip","cat":"New IP Allow","name":"New IP: PPPoE","desc":"নতুন PPPoE network allow: address-list, filter, blackhole, queue target","labels":{"net":"Network (IP/prefix)","fpos":"Filter place-before","queues":"Queue names","target":"Queue target list (পুরো তালিকা)"},"body":"/ip/firewall/address-list/add list=BGP-Networks address={{net}}\n/routing/filter/rule/add chain=OUT rule=\"if (dst == {{net}}) { accept; }\" place-before={{fpos=11}}\n/ip/route/add dst-address={{net}} blackhole\n/queue/simple/set [find name=\"{{queues*=BDIX-VENUS|FNA-VENUS|IX-VENUS}}\"] target={{target}}","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"addr-list","cat":"Advanced","name":"Address-list Add","desc":"এক বা একাধিক IP address-list-এ","labels":{"list":"List name","addr":"Addresses"},"body":"/ip/firewall/address-list/add list={{list=BGP-Networks}} address={{addr*}}{? comment=\"{{comment}}\"?}","pv":2,"src":"builtin","owner":"master","mod":false,"mo":false},{"id":"fw-filter","cat":"Advanced","name":"Firewall Filter Rule","desc":"যে field দেবেন শুধু সেগুলো ব্যবহার হবে","labels":{"src":"Src address","dst":"Dst address","port":"Dst port","pos":"Place-before"},"body":"/ip/firewall/filter/add chain={{chain=forward|input|output}} action={{action=accept|drop|reject}}{? src-address={{src}}?}{? dst-address={{dst}}?}{? protocol={{proto}}?}{? dst-port={{port}}?}{? comment=\"{{comment}}\"?}{? place-before={{pos}}?}","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"ppp-secret","cat":"Advanced","name":"PPPoE Secret (Bulk)","desc":"একাধিক user একই password/profile-এ","body":"/ppp/secret/add name={{users*}} password={{pass}} service=pppoe profile={{profile=default}}","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"backup","cat":"Advanced","name":"Backup + Export","desc":"Change-এর আগে backup নিন","body":"/system/backup/save name={{name=before-change}}\n/export file={{name}}","pv":2,"src":"builtin","owner":"master","mod":false},{"id":"cmwnnyoqy","cat":"Radius","name":"Orbit-Maxim","desc":"","body":"/ip/firewall/nat/\nadd chain=srcnat action=src-nat to-addresses={{NAS}} dst-address=172.17.118.226 place-before=0\nadd chain=srcnat action=src-nat to-addresses={{NAS}} dst-address=172.17.118.230 place-before=1\n\n/radius/\nadd service=ppp address=172.17.118.226 protocol={{protocol=udp|tcp}} secret=RaceR@D321# authentication-port=1812 accounting-port=1813 timeout=3s radsec-timeout=3s300 src-address={{NAS}}\nadd service=ppp address=172.17.118.230 protocol={{protocol=udp|tcp}} secret=RaceR@D321# authentication-port=1812 accounting-port=1813 timeout=3s radsec-timeout=3s300 src-address={{NAS}}","labels":{},"presets":{},"mo":false,"src":"custom","owner":"faridul","mod":true},{"id":"cmwnsoarz","cat":"Radius","name":"Race-Maxim","desc":"","body":"/ip/firewall/nat/\nadd chain=srcnat action=src-nat to-addresses={{NAS}} dst-address=172.17.118.202 place-before=0\nadd chain=srcnat action=src-nat to-addresses={{NAS}} dst-address=172.17.118.206 place-before=1\n\n/radius/\nadd service=ppp address=172.17.118.202 protocol={{Protocol=udp|tcp}} secret=RaceR@D321# authentication-port=1812 accounting-port=1813 timeout=3s radsec-timeout=3s300 src-address={{NAS}}\nadd service=ppp address=172.17.118.206 protocol={{Protocol=udp|tcp}} secret=RaceR@D321# authentication-port=1812 accounting-port=1813 timeout=3s radsec-timeout=3s300 src-address={{NAS}}","labels":{},"presets":{},"mo":false,"src":"custom","owner":"faridul","mod":true},{"id":"cmwnspj93","cat":"New_Link","name":"New-OLT","desc":"ip add + port forward","body":"/ip/address/add address={{Router-side-IP}}/30 interface={{interface=LAN-1}}{? comment=\"{{comment}}\"?}\n\n/ip/firewall/nat/add chain=dstnat action=dst-nat to-addresses={{OLT-side-IP}} to-ports={{OLT-ports}} dst-address={{Public-IP}} dst-port={{Public-port}} {? comment=\"{{comment}}\" ?}","labels":{"OLT-ports":"OLT port"},"presets":{},"mo":false,"src":"custom","owner":"faridul","mod":true},{"id":"cmwnsqs7t","cat":"Routing / BGP","name":"Filter-Rule-With-Default","desc":"","body":"/routing/filter/rule/add chain=IN rule=\"if (dst == 0.0.0.0/0) { accept; }\"\n/routing/filter/rule/add chain=IN rule=\"if (dst in 0.0.0.0/0 && dst-len in 0-32) { reject; }\"\n/routing/filter/rule/add chain=OUT rule=\"if (dst == {{ips*}}) { accept; }\"\n/routing/filter/rule/add chain=OUT rule=\"if (dst in 0.0.0.0/0 && dst-len in 0-32) { reject; }\"","labels":{},"presets":{},"mo":false,"src":"custom","owner":"faridul","mod":true},{"id":"cmwop9i7n","cat":"Mangle","name":"MSS-Clamping","desc":"MSS স্বয়ংক্রিয়ভাবে adjust","body":"/ip/firewall/mangle/add chain=forward action=change-mss new-mss=clamp-to-pmtu protocol=tcp tcp-flags=syn","labels":{},"presets":{},"mo":false,"src":"custom","owner":"faridul","mod":true},{"id":"cmwor7ayr","cat":"Queue","name":"Queue Types","desc":"Download ও Upload Speed নিয়ন্ত্রণ  করা","body":"/queue/type/add kind=pcq name={{name}} pcq-classifier=src-address pcq-rate={{pcq-rate}}\n/queue/type/add kind=pcq name={{name2}} pcq-classifier=dst-address pcq-rate={{pcq-rate}}","labels":{"name":"Name-Src","pcq-rate":"Pcq rate","name2":"Name-Dst"},"presets":{},"mo":false,"src":"custom","owner":"faridul","mod":true},{"id":"cmwovon5g","cat":"Queue","name":"Proper Queue","desc":"types + simple","body":"/queue/type/add kind=pcq name={{name}}_U pcq-classifier=src-address pcq-rate={{pcq-rate}}M\n/queue/type/add kind=pcq name={{name}}_D pcq-classifier=dst-address pcq-rate={{pcq-rate}}M\n/queue/simple/add name={{Simple}} dst={{dst}} max-limit={{upload-max}}M/{{download-max}}_M queue={{name}}_U/{{name}}_D target={{target}}","labels":{"name":"Name-PCQ","pcq-rate":"Pcq rate","Simple":"Q-Name","dst":"Simple-Dst","target":"Target"},"presets":{},"mo":false,"src":"custom","owner":"faridul","mod":true},{"id":"cmwpzzdup","cat":"Routing / BGP","name":"Template and Connection","desc":"2 command · 9 field","body":"/routing/bgp/template/add name={{name}} as={{as}} router-id={{router-id}}\n/routing/bgp/connection/add name={{name2}} templates={{name}} as={{as}} router-id={{router-id}} remote.address={{remote-address=172.24.30.53/32}} remote.as={{remote-as}} local.role={{local-role=ebgp | ibgp}} output.filter-chain={{output-filter-chain=OUT|IN}} output.network={{output-network}}","labels":{"name":"Name of Template","as":"As","router-id":"Router id","name2":"Name of Connection","remote-address":"Remote address","remote-as":"Remote as","local-role":"local-role","output-filter-chain":"Output filter chain","output-network":"Output network"},"presets":{},"mo":false,"src":"custom","owner":"faridul","mod":true},{"id":"cmwq1tknm","cat":"VLAN","name":"for test perpose","desc":"5 command · 7 field","body":"/ip/firewall/address-list/add list={{list=BGP-Networks}} address={{address}}/32\n/ip/address/add address={{address}}/32 interface={{interface=Loopback}}\n/routing/filter/rule/add chain=OUT rule=\"if (dst == {{address}}/32) { accept; }\"{? place-before={{place-before=11}}?}\n/ip/firewall/address-list/add list={{list2=site-access}} address={{address2}}\n/ip/firewall/nat/add chain=srcnat action=src-nat to-addresses={{address}} dst-address-list={{list2=site-access}}{? place-before={{place-before2=2}}?}","labels":{"list":"List","address":"Address","interface":"Interface","place-before":"Place before","list2":"List2","address2":"Address2","place-before2":"Place before2"},"presets":{},"mo":false,"src":"custom","owner":"faridul","mod":true}],"removed":["q-add","pf","bgp"],"cfg":{"signup":"closed","cloud":"","defaults":{"allow":{"all":false,"cats":[],"ids":[]},"tg":{"all":false,"cats":[],"ids":[]},"canCreate":false,"canCopy":true,"canSave":true,"canBasket":true,"maxE":10}},"allowSignup":false}</script>
+<script>
+// Capture exact pristine source HTML at startup so backup/edition downloads preserve 100% of code without runtime mutations
+const RAW_HTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+//#ENGINE
+
+/* ===================== DATA: built-in templates ===================== */
+const BUILTIN=[
+{id:'vlan-add',cat:'VLAN',name:'VLAN Add',desc:'নতুন VLAN interface তৈরি',labels:{name:'VLAN name',id:'VLAN ID',iface:'Parent interface'},
+ body:`/interface/vlan/add name={{name=Vlan}} vlan-id={{id=1010}} interface={{iface=10G-SFP+}}{? comment="{{comment}}"?}`},
+{id:'vlan-iface',cat:'VLAN',name:'VLAN Interface Change',desc:'VLAN-এর parent interface পরিবর্তন',labels:{name:'VLAN name',iface:'New parent interface'},
+ body:`/interface/vlan/set [find name={{name}}] interface={{iface}}`},
+{id:'vlan-state',cat:'VLAN',name:'VLAN Disable / Enable / Remove',desc:'এক বা একাধিক VLAN একসাথে',labels:{names:'VLAN names'},
+ body:`/interface/vlan/{{action=disable|enable|remove}} {{names*}}`},
+{id:'vlan-edit',cat:'VLAN',name:'VLAN ID / Name Change',desc:'বিদ্যমান VLAN-এর আইডি বা নাম বদল',labels:{name:'Current name',id:'New VLAN ID',newname:'New name'},
+ body:`/interface/vlan/set [find name={{name}}] vlan-id={{id}} name={{newname}}`},
+{id:'vlan-view',cat:'VLAN',name:'VLAN List / Export',desc:'তালিকা দেখা বা script export',
+ body:`/interface/vlan/{{action=print|export}}`},
+{id:'vlan-find',cat:'VLAN',name:'VLAN Find / Comment',desc:'ID দিয়ে খোঁজা এবং comment যোগ',labels:{id:'VLAN ID (খোঁজার জন্য)',name:'VLAN name (comment-এর জন্য)'},
+ body:`/interface/vlan/find vlan-id={{id}}\n/interface/vlan/comment numbers={{name}} comment="{{comment}}"`},
+
+{id:'ip-add',cat:'IP Address',name:'IP Add',desc:'নতুন IP address যোগ',
+ body:`/ip/address/add address={{addr}} interface={{iface=ether1}}{? comment="{{comment}}"?}`},
+{id:'ip-state',cat:'IP Address',name:'IP Disable / Enable / Remove',desc:'এক বা একাধিক IP',
+ body:`/ip/address/{{action=disable|enable|remove}} [find address="{{addr*}}"]`},
+{id:'ip-edit',cat:'IP Address',name:'IP / Interface Edit',desc:'IP বা interface এডিট',labels:{addr:'Current address',new:'New address'},
+ body:`/ip/address/set [find address="{{addr}}"] address={{new}} interface={{iface}}`},
+{id:'ip-comment',cat:'IP Address',name:'IP Comment',desc:'Comment যোগ বা পরিবর্তন',
+ body:`/ip/address/comment [find address="{{addr}}"] comment="{{comment}}"`},
+
+{id:'pf',cat:'NAT / Port-Forward',name:'Port Forward',desc:'Preset বেছে নিন (OLT/Telnet/SNMP/SSH) অথবা নিজে দিন',
+ presets:{OLT:{toport:'80',proto:'tcp',comment:'Main-olt'},Telnet:{toport:'23',proto:'tcp',comment:'Telnet'},SNMP:{toport:'161',proto:'udp',comment:'SNMP'},SSH:{toport:'22',proto:'tcp',comment:'SSH'}},
+ labels:{to:'Internal / OLT IP',toport:'Internal port',pub:'Public IP',pubport:'Public port'},
+ body:`/ip/firewall/nat/add chain=dstnat action=dst-nat to-addresses={{to}} to-ports={{toport=80}} protocol={{proto=tcp|udp}} dst-address={{pub}} dst-port={{pubport}}{? comment="{{comment}}"?}{? place-before={{pos}}?}`},
+{id:'olt-full',cat:'NAT / Port-Forward',name:'OLT Full Set (Web+Telnet+SNMP+SSH)',desc:'এক OLT-এর চারটি forward একসাথে',
+ labels:{to:'OLT IP',pub:'Public IP','p-web':'Public port: Web','p-telnet':'Public port: Telnet','p-snmp':'Public port: SNMP','p-ssh':'Public port: SSH'},
+ body:`/ip/firewall/nat/add chain=dstnat action=dst-nat to-addresses={{to}} to-ports=80 protocol=tcp dst-address={{pub}} dst-port={{p-web=1020}} comment="Main-olt"
+/ip/firewall/nat/add chain=dstnat action=dst-nat to-addresses={{to}} to-ports=23 protocol=tcp dst-address={{pub}} dst-port={{p-telnet=1011}} comment="Telnet"
+/ip/firewall/nat/add chain=dstnat action=dst-nat to-addresses={{to}} to-ports=161 protocol=udp dst-address={{pub}} dst-port={{p-snmp=1012}} comment="SNMP"
+/ip/firewall/nat/add chain=dstnat action=dst-nat to-addresses={{to}} to-ports=22 protocol=tcp dst-address={{pub}} dst-port={{p-ssh=1013}} comment="SSH"`},
+{id:'dns-redirect',cat:'NAT / Port-Forward',name:'DNS Redirect',desc:'TCP + UDP 53 অন্য DNS-এ redirect',
+ body:`/ip/firewall/nat/add action=dst-nat chain=dstnat dst-port=53 protocol=tcp to-addresses={{dns=8.8.8.8}} to-ports=53{? place-before={{pos=2}}?}
+/ip/firewall/nat/add action=dst-nat chain=dstnat dst-port=53 protocol=udp to-addresses={{dns}} to-ports=53{? place-before={{pos}}?}`},
+{id:'nat-set',cat:'NAT / Port-Forward',name:'NAT Rule Modify',desc:'যে field গুলো দেবেন শুধু সেগুলোই বদলাবে',labels:{num:'Rule number',to:'to-addresses',toport:'to-ports',pub:'dst-address',pubport:'dst-port',list:'dst-address-list'},
+ body:`/ip/firewall/nat/set {{num}}{? to-addresses={{to}}?}{? to-ports={{toport}}?}{? dst-address={{pub}}?}{? dst-port={{pubport}}?}{? dst-address-list={{list}}?}`},
+{id:'nat-comment',cat:'NAT / Port-Forward',name:'NAT Comment',desc:'Rule-এ comment',labels:{num:'Rule number'},
+ body:`/ip/firewall/nat/comment {{num}} comment="{{comment}}"`},
+
+{id:'blackhole',cat:'Routing / BGP',name:'Blackhole Route',desc:'এক বা একাধিক network',labels:{dst:'Destination (IP বা IP/prefix)'},
+ body:`/ip/route/add dst-address={{dst*}} blackhole`},
+{id:'rfilter',cat:'Routing / BGP',name:'Route Filter Rule (accept)',desc:'/routing/filter/rule-এ accept rule',labels:{dst:'Destination',chain:'Chain',pos:'Place-before'},
+ body:`/routing/filter/rule/add chain={{chain=OUT}} rule="if (dst == {{dst*}}) { accept; }"{? place-before={{pos=11}}?}`},
+{id:'bgp',cat:'Routing / BGP',name:'BGP Connection (v7)',desc:'নতুন BGP peer। আপনার RouterOS v7 সংস্করণে syntax মিলিয়ে নিন',
+ body:`/routing/bgp/connection/add name={{name}} remote.address={{peer}} remote.as={{ras}} as={{las}} local.role={{role=ebgp|ibgp}} output.filter-chain={{out=OUT}}{? input.filter={{in}}?}{? output.network={{nl=BGP-Networks}}?}{? router-id={{rid}}?}`},
+
+{id:'q-find',cat:'Queue',name:'Queue Find',desc:'Queue-এর নাম দিয়ে detail দেখা',
+ body:`/queue/simple/print detail where name="{{name=IX-Bkp-VENUS}}"`},
+{id:'q-target',cat:'Queue',name:'Queue Target Set (IP Add / Delete)',desc:'একাধিক queue-তে একই target list বসানো। পুরো list replace হয়, তাই পুরো তালিকা দিন',labels:{names:'Queue names',target:'Target list (comma দিয়ে)'},
+ body:`/queue/simple/set [find name="{{names*=BDIX-VENUS|FNA-VENUS|IX-VENUS}}"] target={{target}}`},
+{id:'q-add',cat:'Queue',name:'Queue Add',desc:'নতুন simple queue',labels:{limit:'Max-limit (upload/download)'},
+ body:`/queue/simple/add name={{name}} target={{target}} max-limit={{limit=10M/10M}}{? comment="{{comment}}"?}`},
+
+{id:'site-access',cat:'New IP Allow',name:'New IP: Site Access',desc:'নতুন IP loopback-এ বসিয়ে নির্দিষ্ট site-এ src-nat',labels:{ip:'New IP (mask ছাড়া)',sites:'Site IPs',loop:'Loopback interface',fpos:'Filter place-before',npos:'NAT place-before'},
+ body:`/ip/firewall/address-list/add list=BGP-Networks address={{ip}}/32
+/ip/address/add address={{ip}}/32 interface={{loop=Loopback}}
+/routing/filter/rule/add chain=OUT rule="if (dst == {{ip}}/32) { accept; }" place-before={{fpos=11}}
+/ip/firewall/address-list/add list=site-access address={{sites*}}
+/ip/firewall/nat/add chain=srcnat action=src-nat to-addresses={{ip}} dst-address-list=site-access place-before={{npos=2}}`},
+{id:'pppoe-ip',cat:'New IP Allow',name:'New IP: PPPoE',desc:'নতুন PPPoE network allow: address-list, filter, blackhole, queue target',labels:{net:'Network (IP/prefix)',fpos:'Filter place-before',queues:'Queue names',target:'Queue target list (পুরো তালিকা)'},
+ body:`/ip/firewall/address-list/add list=BGP-Networks address={{net}}
+/routing/filter/rule/add chain=OUT rule="if (dst == {{net}}) { accept; }" place-before={{fpos=11}}
+/ip/route/add dst-address={{net}} blackhole
+/queue/simple/set [find name="{{queues*=BDIX-VENUS|FNA-VENUS|IX-VENUS}}"] target={{target}}`},
+
+{id:'addr-list',cat:'Advanced',name:'Address-list Add',desc:'এক বা একাধিক IP address-list-এ',labels:{list:'List name',addr:'Addresses'},
+ body:`/ip/firewall/address-list/add list={{list=BGP-Networks}} address={{addr*}}{? comment="{{comment}}"?}`},
+{id:'fw-filter',cat:'Advanced',name:'Firewall Filter Rule',desc:'যে field দেবেন শুধু সেগুলো ব্যবহার হবে',labels:{src:'Src address',dst:'Dst address',port:'Dst port',pos:'Place-before'},
+ body:`/ip/firewall/filter/add chain={{chain=forward|input|output}} action={{action=accept|drop|reject}}{? src-address={{src}}?}{? dst-address={{dst}}?}{? protocol={{proto}}?}{? dst-port={{port}}?}{? comment="{{comment}}"?}{? place-before={{pos}}?}`},
+{id:'ppp-secret',cat:'Advanced',name:'PPPoE Secret (Bulk)',desc:'একাধিক user একই password/profile-এ',
+ body:`/ppp/secret/add name={{users*}} password={{pass}} service=pppoe profile={{profile=default}}`},
+{id:'backup',cat:'Advanced',name:'Backup + Export',desc:'Change-এর আগে backup নিন',
+ body:`/system/backup/save name={{name=before-change}}\n/export file={{name}}`}
+];
+
+/* ===================== ENGINE ===================== */
+const LABELS={name:'Name',id:'ID',iface:'Interface',comment:'Comment',addr:'Address (IP/prefix)',new:'New address',pub:'Public IP',pubport:'Public port',to:'Internal IP',toport:'Internal port',proto:'Protocol',num:'Rule number',list:'List name',dst:'Destination',chain:'Chain',pos:'Place-before (optional)',names:'Names',target:'Target',ip:'IP',sites:'Site IPs',net:'Network',dns:'DNS server',action:'Action',newname:'New name',users:'Usernames',pass:'Password',peer:'Peer IP',ras:'Remote AS',las:'Local AS',role:'Role',out:'Output filter chain',in:'Input filter',nl:'Output network list',rid:'Router-ID',profile:'Profile',limit:'Max-limit'};
+const PH=/\{\{\s*([\w-]+)(\*)?(?:\s*=\s*([^}]*?))?\s*\}\}/g, OP=/\{\?([\s\S]*?)\?\}/g;
+
+// Helper to parse template body lines while keeping original line indices (for command toggling)
+function bodyLinesOf(t){
+  return (t.body||'').split('\n').map((raw,idx)=>({raw:raw.trim(),idx})).filter(x=>x.raw);
+}
+
+function fieldsOf(t, activeBody){
+  const srcBody = activeBody !== undefined ? activeBody : t.body;
+  const m={},req=new Set();
+  srcBody.replace(PH,(a,k,s,d)=>{
+    const f=m[k]=m[k]||{k,def:'',list:false,opts:null,set:false,label:(t.labels||{})[k]||LABELS[k]||k.replace(/[-_]/g,' ')};
+    if(s)f.list=true;
+    if(d!==undefined&&!f.set){f.set=true;
+      if(d.includes('|')){const o=d.split('|').map(x=>x.trim());if(s)f.def=o.join('\n');else{f.opts=o;f.def=o[0]}}
+      else f.def=d.trim()}
+    return a});
+  srcBody.replace(OP,'').replace(PH,(a,k)=>(req.add(k),a));
+  return Object.values(m).map(f=>({...f,opt:!req.has(f.k)}));
+}
+
+function render(t,v,disabledSet){
+  const lines = bodyLinesOf(t).filter(x => !disabledSet || !disabledSet.has(x.idx));
+  if(!lines.length) return [];
+  const filteredBody = lines.map(x=>x.raw).join('\n');
+  const F=Object.fromEntries(fieldsOf(t, filteredBody).map(f=>[f.k,f]));
+  const val=k=>(v[k]||'').trim();
+  const items=k=>val(k).split('\n').map(s=>s.trim()).filter(Boolean);
+  const empty=k=>!F[k] || (F[k].list?!items(k).length:!val(k));
+  const b=filteredBody.replace(OP,(a,inner)=>{let ok=true;inner.replace(PH,(x,k)=>(empty(k)&&(ok=false),x));return ok?inner:''});
+  return b.split('\n').map(l=>l.trim()).filter(Boolean).flatMap(line=>{
+    let star=null;line.replace(PH,(a,k,s)=>(s&&!star&&(star=k),a));
+    const sub=it=>line.replace(PH,(a,k,s)=>{
+      if(s&&k===star)return it;
+      if(F[k]&&F[k].list)return items(k).join(',')||'‹'+k+'›';
+      return val(k)||'‹'+k+'›'});
+    if(star){const it=items(star);return it.length?it.map(sub):[sub('‹'+star+'›')]}
+    return [sub()];
+  });
+}
+
+function group(lines){const out=[];let cur='';
+  lines.forEach(l=>{const m=l.match(/^(\/(?:[^\s\/]+\/)+)([^\s\/]\S*)([\s\S]*)$/);
+    if(!m){out.push(l);cur='';return}
+    if(m[1]!==cur){out.push(m[1]);cur=m[1]}
+    out.push(m[2]+m[3])});
+  return out}
+
+const VERBS=new Set(['add','set','remove','disable','enable','print','find','comment','export','get','move','unset','edit','save','import','reset-counters','monitor','release','renew']);
+const FLAGS=new Set(['blackhole','detail','where','brief','terse','without-paging','as-value','verbose']);
+const FIXED=new Set(['chain','action','disabled','connection-state','connection-nat-state','in-interface-list','out-interface-list','service']);
+const KEEP=/^(interface|place-before|list|max-limit|profile|distance|to-ports|remote-address|lease-time)$/;
+const IPR=/^(\d{1,3}(?:\.\d{1,3}){3})(\/\d{1,2})?$/,IPS=/\d{1,3}(?:\.\d{1,3}){3}/,IPG=/\d{1,3}(?:\.\d{1,3}){3}(?:\/\d{1,2})?/g;
+const IPL=/^\s*\d{1,3}(?:\.\d{1,3}){3}(?:\/\d{1,2})?(?:\s*,\s*\d{1,3}(?:\.\d{1,3}){3}(?:\/\d{1,2})?)*\s*$/;
+
+function lex(s){const out=[];let i=0;const ws=c=>c===' '||c==='\t'||c==='\r';
+  while(i<s.length){
+    if(ws(s[i])){i++;continue}
+    if(s[i]==='['){let d=1,j=i+1;while(j<s.length&&d){if(s[j]==='[')d++;else if(s[j]===']')d--;j++}
+      out.push({t:'br',toks:lex(s.slice(i+1,d?j:j-1))});i=j;continue}
+    let j=i;while(j<s.length&&!ws(s[j])&&s[j]!=='='&&s[j]!=='[')j++;
+    const w=s.slice(i,j);
+    if(s[j]==='='){j++;let q='',v;
+      if(s[j]==='"'){q='"';let k=j+1;while(k<s.length&&(s[k]!=='"'||s[k-1]==='\\'))k++;v=s.slice(j+1,k);j=k+1}
+      else{let k=j,d=0;while(k<s.length&&(d||!ws(s[k]))){const c=s[k];if(c==='('||c==='[')d++;else if((c===')'||c===']')&&d)d--;k++}v=s.slice(j,k);j=k}
+      out.push({t:'kv',key:w,q,val:v})}
+    else out.push({t:'b',text:w});
+    i=Math.max(j,i+1)}
+  return out}
+
+function parseLine(L,ctx){L=L.trim();if(!L||L[0]==='#')return null;
+  const m=L.match(/^(\S+)([\s\S]*)$/),t0=m[1],toks=lex(m[2]);let segs=[],verb;
+  if(!/\s/.test(L)&&t0.includes('/')){const s=t0.split('/').filter(Boolean);if(!VERBS.has(s[s.length-1]))return{ctx:'/'+s.join('/')+'/'}}
+  if(t0.includes('/')){segs=t0.split('/').filter(Boolean);if(VERBS.has(segs[segs.length-1]))verb=segs.pop();
+    while(!verb&&toks.length&&toks[0].t==='b'){const w=toks.shift().text;VERBS.has(w)?verb=w:segs.push(w)}}
+  else if(ctx&&VERBS.has(t0)){segs=ctx.split('/').filter(Boolean);verb=t0}
+  if(!verb)return{raw:L};
+  const path=segs.length?'/'+segs.join('/')+'/':'/';
+  return{path,segs,verb,toks,head:path+verb}}
+
+function attach(l){l.slots=[];
+  const S=(key,val,kind,br)=>{const s={key:String(key||'x').replace(/[^\w-]/g,'-'),val,kind,suf:'',inBr:br,verb:l.verb};l.slots.push(s);return s};
+  const walk=(toks,br)=>toks.forEach(tk=>{
+    if(tk.t==='br')return walk(tk.toks,true);
+    if(tk.t==='b'){if(!FLAGS.has(tk.text)&&tk.text!=='find')tk.slot=S(/^\d+$/.test(tk.text)?'num':'target',tk.text,'pos',br);return}
+    if(IPL.test(tk.val)||!IPS.test(tk.val))tk.parts=[S(tk.key,tk.val,'kv',br)];
+    else{tk.parts=[];let p=0;for(const m of tk.val.matchAll(IPG)){tk.parts.push(tk.val.slice(p,m.index),S('ip',m[0],'sub',br));p=m.index+m[0].length}tk.parts.push(tk.val.slice(p))}});
+  walk(l.toks,false);const n=l.toks.filter(t=>t.t==='kv').length;l.slots.forEach(s=>s.nkv=n)}
+
+function txt(l,f){if(l.raw)return l.raw;
+  const T=tk=>tk.t==='br'?'['+tk.toks.map(T).join(' ')+']':tk.t==='b'?(tk.slot?f(tk.slot):tk.text):tk.key+'='+tk.q+tk.parts.map(x=>typeof x==='string'?x:f(x)).join('')+tk.q;
+  const op=tk=>tk.t==='kv'&&tk.parts.length===1&&typeof tk.parts[0]!=='string'&&tk.parts[0].row&&tk.parts[0].row.mode==='opt';
+  return l.head+l.toks.map(tk=>op(tk)?'{? '+T(tk)+'?}':' '+T(tk)).join('')}
+
+function collapse(lines){const out=[];
+  for(const l of lines){const p=out[out.length-1];
+    if(p&&!p.raw&&!l.raw&&p.sk===l.sk){
+      const d=l.slots.map((s,i)=>s.val!==p.slots[i].val?i:-1).filter(i=>i>=0);
+      if(d.length===1&&(p.listIdx===undefined||p.listIdx===d[0])){const s=p.slots[d[0]];s.list=true;(s.vals=s.vals||[s.val]).push(l.slots[d[0]].val);p.listIdx=d[0];continue}}
+    out.push(l)}
+  return out}
+
+function derive(lines){const slots=lines.flatMap(l=>l.slots||[]),rows=[],map={},used=new Set();
+  const uniq=k=>{let n=k,i=2;while(used.has(n))n=k+i++;used.add(n);return n};
+  slots.forEach(s=>{const ip=!s.list&&s.val.match(IPR);s.ipb=ip;
+    const id=ip?'ip:'+ip[1]:(s.list||s.kind==='pos'||FIXED.has(s.key)||s.val.length<4||/^\d+$/.test(s.val)?s.key+'\0':'v\0')+(s.vals||[s.val]).join('\n');
+    let r=map[id];if(!r){r=map[id]={key:uniq(s.key),slots:[],ip:!!ip};rows.push(r)}
+    r.slots.push(s);s.row=r});
+  rows.forEach(r=>{const f=r.slots[0],k=f.key;
+    if(r.ip){if(new Set(r.slots.map(s=>s.ipb[2]||'')).size>1){r.ex=f.ipb[1];r.slots.forEach(s=>s.suf=s.ipb[2]||'')}else r.ex=f.val}
+    else r.ex=(f.vals||[f.val]).join('\n');
+    r.mode=f.list?'list':FIXED.has(k)?'fixed':k==='protocol'?'sel':(f.kind==='kv'&&!f.inBr&&((k==='comment'&&f.verb!=='comment')||k==='place-before'||(f.verb==='set'&&f.nkv>1)))?'opt':'in';
+    r.opts=k==='protocol'?[...new Set([r.ex,'tcp','udp'])].join(','):'';
+    r.def=r.mode==='list'?r.ex.split('\n').join('|'):(KEEP.test(k)?r.ex:'')});
+  return rows}
+
+function analyze(text){let ctx='',lines=[];
+  text.split('\n').forEach(L=>{const p=parseLine(L,ctx);if(!p)return;if(p.ctx)ctx=p.ctx;else lines.push(p)});
+  lines.forEach(l=>{if(!l.raw){attach(l);l.sk=txt(l,()=>'\u0001')}});
+  lines=collapse(lines);return{lines,rows:derive(lines)}}
+
+function bodyOf(lines,rows){
+  const ph=s=>{const r=s.row;if(!r||r.mode==='fixed')return s.val;
+    const d=r.mode==='sel'?r.opts.split(/[,|]/).map(x=>x.trim()).filter(Boolean).join('|'):r.mode==='list'?r.def.trim():r.def.trim().replace(/[{}|]/g,'');
+    return '{{'+r.key+(r.mode==='list'?'*':'')+(d?'='+d:'')+'}}'+s.suf};
+  return lines.map(l=>txt(l,ph)).join('\n')}
+//#END
+
+/* ===================== UI & ANIMATIONS ===================== */
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LS={get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){console.warn('Local save failed for '+k,e);return false}}};
+let cur=LS.get('mt_cur',''),bk='',grp=LS.get('mt_grp',true),ents=[],q='';
+let disabledCmds = new Set(); // Stores indices of commands toggled OFF by user
+
+const all=()=>vis(),T=()=>all().find(t=>t.id===cur)||all()[0];
+const defs=t=>Object.fromEntries(fieldsOf(t).map(f=>[f.k,f.def]));
+const hue=s=>Math.abs([...s].reduce((a,c)=>(a*31+c.charCodeAt(0))|0,7))%360;
+
+// Check if current user can toggle commands on template t
+function canToggleCmds(t){
+  if(!t) return false;
+  if(isM()) return true;
+  const u=me();
+  if(!u) return false;
+  const a=u.allow||{};
+  if(a.cmdToggleAll) return true;
+  return Array.isArray(a.cmdToggleIds) && a.cmdToggleIds.includes(t.id);
+}
+
+function activeBodyFor(t){
+  if(!t) return '';
+  const lines = bodyLinesOf(t);
+  return lines.filter(x=>!disabledCmds.has(x.idx)).map(x=>x.raw).join('\n');
+}
+
+function outText(){
+  const t=T();
+  if(!t) return '';
+  const ab = activeBodyFor(t);
+  const must=fieldsOf(t, ab).filter(f=>!f.opt&&!f.def);
+  const blank=v=>must.length&&must.every(f=>!(v[f.k]||'').trim());
+  let E=ents.filter(v=>!blank(v));if(!E.length)E=[ents[0]];
+  const L=E.flatMap(v=>render(t,v,disabledCmds));
+  return(grp?group(L):L).join('\n');
+}
+
+function toast(m){
+  const e=document.createElement('div');e.className='toast';e.textContent=m;document.body.append(e);
+  if(window.gsap){
+    gsap.fromTo(e,{y:24,opacity:0,scale:.9},{y:0,opacity:1,scale:1,duration:.35,ease:'back.out(1.7)'});
+    gsap.to(e,{y:-16,opacity:0,duration:.3,delay:1.5,onComplete:()=>e.remove()});
+  }else setTimeout(()=>e.remove(),1800);
+}
+
+function copy(s){
+  const fb=()=>{const a=document.createElement('textarea');a.value=s;document.body.append(a);a.select();document.execCommand('copy');a.remove();toast('Copied')};
+  try{navigator.clipboard.writeText(s).then(()=>toast('Copied'),fb)}catch(e){fb()}
+}
+
+function dl(name,text){
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/plain'}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);
+}
+
+/* ---------- Three.js Subtle Particle Mesh Background ---------- */
+function initThreeBG(){
+  try{
+    if(!window.THREE) return;
+    const canvas = $('#bg-canvas');
+    const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.z = 32;
+
+    const geo = new THREE.BufferGeometry();
+    const count = 90;
+    const pos = new Float32Array(count * 3);
+    for(let i=0;i<count*3;i++) pos[i] = (Math.random() - 0.5) * 65;
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+
+    const mat = new THREE.PointsMaterial({color: 0x14b8a6, size: 0.35, transparent:true, opacity:0.65});
+    const points = new THREE.Points(geo, mat);
+    scene.add(points);
+
+    const wireGeo = new THREE.IcosahedronGeometry(14, 1);
+    const wireMat = new THREE.MeshBasicMaterial({color: 0x0ea5e9, wireframe:true, transparent:true, opacity:0.07});
+    const mesh = new THREE.Mesh(wireGeo, wireMat);
+    scene.add(mesh);
+
+    window.addEventListener('resize', ()=>{
+      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    function animate(){
+      requestAnimationFrame(animate);
+      points.rotation.y += 0.0008;
+      points.rotation.x += 0.0004;
+      mesh.rotation.y -= 0.0012;
+      mesh.rotation.z += 0.0007;
+      renderer.render(scene, camera);
+    }
+    animate();
+  }catch(e){}
+}
+
+/* ---------- Lottie + Anime.js + GSAP + Motion Micro-animations ---------- */
+function initBrandLottie(){
+  try{
+    if(!window.lottie) return;
+    const el = $('#lottie-brand');
+    // Minimal clean pulse vector animation JSON
+    const animData = {
+      v:"5.7.4",fr:30,ip:0,op:60,w:40,h:40,nm:"Pulse",ddd:0,assets:[],
+      layers:[{
+        ddd:0,ind:1,ty:4,nm:"BoltRing",sr:1,
+        ks:{o:{a:0,k:100},r:{a:1,k:[{t:0,s:[0]},{t:60,s:[360]}]},p:{a:0,k:[20,20,0]},s:{a:1,k:[{t:0,s:[90,90,100]},{t:30,s:[108,108,100]},{t:60,s:[90,90,100]}]}},
+        shapes:[{ty:"el",p:{a:0,k:[0,0]},s:{a:0,k:[28,28]}},{ty:"st",c:{a:0,k:[1,1,1,0.85]},w:{a:0,k:2.5},lc:2,lj:2}]
+      }]
+    };
+    el.innerHTML='';
+    lottie.loadAnimation({container:el,renderer:'svg',loop:true,autoplay:true,animationData:animData});
+  }catch(e){}
+}
+
+function animateEntrance(){
+  try{
+    if(window.gsap){
+      gsap.from('.side',{x:-24,opacity:0,duration:.45,ease:'power3.out',clearProps:'transform'});
+      gsap.from('.basket',{x:24,opacity:0,duration:.45,ease:'power3.out',clearProps:'transform'});
+    }
+    if(window.anime){
+      anime({
+        targets: '#nav .nv',
+        translateX: [-12, 0],
+        opacity: [0, 1],
+        delay: anime.stagger(22),
+        duration: 360,
+        easing: 'easeOutQuad'
+      });
+    }
+  }catch(e){}
+}
+
+function animateCards(){
+  try{
+    if(window.Motion && Motion.animate){
+      Motion.animate('#ents .card', { opacity: [0.3, 1], y: [10, 0] }, { duration: 0.28 });
+    }else if(window.gsap){
+      gsap.from('#ents .card',{y:10,opacity:0,duration:.28,stagger:.05,ease:'power2.out',clearProps:'transform'});
+    }
+  }catch(e){}
+}
+
+function setT(id){
+  cur=id;const t=T();cur=t?t.id:'';LS.set('mt_cur',cur);
+  disabledCmds = new Set(); // reset per-command switches on template change
+  ents=t?[defs(t)]:[];
+  draw();
+}
+
+function nav(){
+  const g={};
+  all().filter(t=>!q||(t.name+t.desc+t.cat+t.body).toLowerCase().includes(q)).forEach(t=>(g[t.cat]=g[t.cat]||[]).push(t));
+  $('#nav').innerHTML=Object.entries(g).map(([c,a])=>`<h4><i style="background:hsl(${hue(c)} 65% 52%)"></i>${esc(c)}<span>${a.length}</span></h4>`+a.map(t=>`<button class="nv${t.id===cur?' on':''}" data-id="${esc(t.id)}">${esc(t.name)}${t.src==='custom'?' <u>●</u>':''}</button>`).join('')).join('')||'<p class="mu">কিছু পাওয়া যায়নি</p>';
+}
+
+function cmdToggleBar(t){
+  if(!canToggleCmds(t)) return '';
+  const lines = bodyLinesOf(t);
+  if(lines.length <= 1) return ''; // Only meaningful when template has multiple commands/lines
+  return `<div class="cmd-ctrl">
+    <div class="cmd-ctrl-title">
+      <span>⚡ Command Output Control (কোন command-গুলো output-এ থাকবে তা বেছে নিন)</span>
+      <div class="row">
+        <button class="b g sm" id="cmdAllOn" type="button">সব ON</button>
+        <button class="b g sm" id="cmdAllOff" type="button">সব OFF</button>
+      </div>
+    </div>
+    <div class="cmd-toggles">
+      ${lines.map((l,i)=>{
+        const isOn = !disabledCmds.has(l.idx);
+        const label = l.raw.replace(/\{\{([^}=*]+)(?:\*)?(?:=[^}]*)?\}\}/g,'<$1>').replace(/\{\?[\s\S]*?\?\}/g,'');
+        return `<button type="button" class="cmd-btn ${isOn?'on':'off'}" data-cidx="${l.idx}" title="${esc(l.raw)}">
+          <span class="cmd-dot"></span>
+          <span>#${i+1}</span>
+          <span class="cmd-txt">${esc(label)}</span>
+        </button>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function draw(){
+  nav();
+  const t=T();
+  if(!t){$('#main').innerHTML='<div class="card"><h1>Template নেই</h1><p class="mu">Master আপনাকে কোনো template allow করেননি।</p></div>';return}
+  $('#main').innerHTML=`<header>
+    <div>
+      <span class="pill">${esc(t.cat)}</span>
+      <h1>${esc(t.name)}</h1>
+      <p class="mu">${esc(t.desc||'')}</p>
+    </div>
+    <div class="row">
+      ${canEdit(t)?'<button class="b g" id="ed">✎ Edit</button>':''}
+      ${isM()||me().canCreate===true?'<button class="b g" id="cl">⧉ Duplicate</button>':''}
+      ${canEdit(t)?'<button class="b d" id="del">Delete</button>':''}
+    </div>
+  </header>
+  ${cmdToggleBar(t)}
+  <div id="ents"></div>
+  <div><button class="b g" id="addE">＋ আরেকটি entry</button></div>
+  <section class="pv">
+    <div class="pvh">
+      <b>Output</b>
+      <span id="warn"></span>
+      <label class="tg"><input type="checkbox" id="grp"${grp?' checked':''}> Path একবার</label>
+      ${P('canCopy')?'<button class="b g" id="cp">Copy</button>':''}
+      ${P('canBasket')?'<button class="b" id="ab">＋ Basket</button>':''}
+    </div>
+    <pre id="out"></pre>
+  </section>`;
+  cards();
+  out();
+  animateCards();
+}
+
+function cards(){
+  const t=T();
+  const ab = activeBodyFor(t);
+  const F=fieldsOf(t, ab);
+  const P=Object.keys(t.presets||{});
+  if(!F.length && bodyLinesOf(t).length>0){
+    $('#ents').innerHTML = `<div class="card"><p class="mu" style="margin:0">এই মুহূর্তে চালু থাকা command-গুলোর জন্য কোনো input field প্রয়োজন নেই। নিচে সরাসরি Output দেখুন।</p></div>`;
+    return;
+  }
+  $('#ents').innerHTML=ents.map((v,i)=>`<div class="card" data-i="${i}">
+    <div class="ch">
+      <span class="en">${i+1}</span>
+      ${P.length?`<div class="chips">${P.map(p=>`<button class="chip" data-p="${esc(p)}">${esc(p)}</button>`).join('')}</div>`:''}
+      ${ents.length>1?'<button class="x" title="Remove">✕</button>':''}
+    </div>
+    <div class="fg">
+      ${F.map(f=>`<label class="${f.list?'wide':''}">
+        <span>${esc(f.label)}${f.opt?' <em>(optional)</em>':''}${f.list?' <em>(প্রতি লাইনে একটি)</em>':''}</span>
+        ${f.opts?`<select data-k="${esc(f.k)}">${f.opts.map(o=>`<option${o===v[f.k]?' selected':''}>${esc(o)}</option>`).join('')}</select>`
+        :f.list?`<textarea rows="3" data-k="${esc(f.k)}">${esc(v[f.k]||'')}</textarea>`
+        :`<input data-k="${esc(f.k)}" value="${esc(v[f.k]||'')}">`}
+      </label>`).join('')}
+    </div>
+  </div>`).join('');
+}
+
+function out(){
+  const s=outText();
+  $('#out').textContent=s || '# কোনো command সিলেক্ট করা নেই';
+  $('#warn').textContent=s.includes('‹')?'⚠ কিছু field ফাঁকা':'';
+}
+
+function sync(){
+  $('#bk').value=bk;LS.set('mt_bk:'+session,bk);
+  const n=bk.split('\n').map(l=>l.trim()).filter(l=>l&&!l.startsWith('#')&&!/^\/\S*\/$/.test(l)).length;
+  $('#bc').textContent=n+' command';
+}
+function addB(n,s){
+  if(!s.trim())return;
+  bk=(bk?bk+'\n':'# RouterOS v7 script · '+new Date().toISOString().slice(0,10)+'\n\n')+'# --- '+n+' ---\n'+s+'\n';
+  sync();toast('Basket-এ যোগ হয়েছে');
+}
+
+$('#main').addEventListener('input',e=>{
+  const k=e.target.dataset.k;if(!k)return;
+  ents[e.target.closest('.card').dataset.i][k]=e.target.value;out();
+});
+$('#main').addEventListener('change',e=>{
+  if(e.target.id==='grp'){grp=e.target.checked;LS.set('mt_grp',grp);out()}
+});
+$('#main').addEventListener('click',e=>{
+  const cbtn = e.target.closest('.cmd-btn');
+  if(cbtn){
+    const idx = +cbtn.dataset.cidx;
+    if(disabledCmds.has(idx)) disabledCmds.delete(idx);
+    else disabledCmds.add(idx);
+    draw();
+    return;
+  }
+  const id=e.target.id,x=e.target.closest('.x'),pc=e.target.closest('.chip'),t=T();
+  if(id==='cmdAllOn'){disabledCmds.clear();draw();}
+  else if(id==='cmdAllOff'){bodyLinesOf(t).forEach(l=>disabledCmds.add(l.idx));draw();}
+  else if(id==='addE'){if(ents.length>=maxE())return toast('Limit: সর্বোচ্চ '+maxE()+' entry');ents.push(defs(t));cards();out();animateCards()}
+  else if(x){ents.splice(+x.closest('.card').dataset.i,1);cards();out()}
+  else if(pc){Object.assign(ents[pc.closest('.card').dataset.i],t.presets[pc.dataset.p]);cards();out()}
+  else if(id==='cp')copy(outText());
+  else if(id==='ab')addB(t.name,outText());
+  else if(id==='ed')build(t);
+  else if(id==='cl')build({...t,id:'',name:t.name+' (copy)',src:'custom',owner:me().u,mo:false,mod:false});
+  else if(id==='del'&&confirm('"'+t.name+'" delete করবেন?')){delT(t.id);setT('')}
+});
+
+$('#nav').addEventListener('click',e=>{const b=e.target.closest('.nv');if(b)setT(b.dataset.id)});
+$('#q').addEventListener('input',e=>{q=e.target.value.toLowerCase();nav()});
+addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('#q').focus();$('#q').select()}});
+$('#newT').onclick=()=>build({cat:'Custom',body:''});
+$('#updHtmlBtn').onclick=()=>updateSameHtmlFile(false);
+$('#ackHtmlSync').onclick=()=>{if(confirm('আপনি কি downloaded updated HTML দিয়ে পুরোনো ফাইল replace করেছেন? Confirm করলে sync warning বন্ধ হবে।'))markHtmlDirty(false,'● Local autosave complete · HTML replacement manually confirmed')};
+$('#adm').onclick=()=>admin();$('#proBtn').onclick=()=>admin('x');$('#lo').onclick=logout;
+$('#theme').onclick=()=>{const d=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=d;LS.set('mt_theme',d)};
+$('#bk').addEventListener('input',e=>{bk=e.target.value;LS.set('mt_bk:'+session,bk)});
+$('#bcopy').onclick=()=>copy(bk);
+$('#bsave').onclick=()=>dl('mikrotik-'+new Date().toISOString().slice(0,10)+'.rsc',bk);
+$('#bclr').onclick=()=>{if(confirm('Basket খালি করবেন?')){bk='';sync()}};
+
+/* ---------- Smart template builder (with Existing Category Dropdown + Manual Input) ---------- */
+const MODES=[['in','Input'],['opt','Optional'],['sel','Dropdown'],['list','List (একাধিক)'],['fixed','Fixed']];
+const cap=s=>s?s[0].toUpperCase()+s.slice(1):'';
+const tc=p=>p.split('/').filter(Boolean).map(w=>/^(ip|vlan|nat|dhcp|dns|bgp|ppp|pppoe|ospf|mac|ntp|snmp|olt|qos|vpn)$/i.test(w)?w.toUpperCase():cap(w)).join(' ');
+const catOf=p=>/^\/interface\/vlan/.test(p)?'VLAN':/^\/ip\/address/.test(p)?'IP Address':/^\/ip\/firewall\/nat/.test(p)?'NAT / Port-Forward':/^\/(routing|ip\/route)/.test(p)?'Routing / BGP':/^\/queue/.test(p)?'Queue':'Custom';
+
+function build(o,back){
+  const d=$('#dlg'),$d=s=>d.querySelector(s);
+  if(o.id&&!canEdit(o))return;
+  let A={lines:[],rows:[]},tch={n:!!o.id,c:!!o.id,d:!!o.id},tm,labs={...(o.labels||{})},builderDirty=false;
+  const existingCats = [...new Set([...BUILTIN.map(x=>x.cat), ...ws.tpls.map(t=>t.cat), 'Custom'].filter(Boolean))];
+  const initCat = o.cat || 'Custom';
+
+  d.className='wide';d.onclose=null;
+  d.innerHTML=`<div class="dl"><div class="dh"><h2>${o.id?'Template edit':'Template builder'}</h2><button class="x" id="bx">✕</button></div>
+<div class="tabs"><button class="tab" data-p="s">Smart · command paste করুন</button><button class="tab" data-p="m">Manual · নিজে লিখুন</button></div>
+<div id="ps" class="dl" style="padding:0"><p class="note">১) আপনার command যেভাবে লেখেন সেভাবে, real value সহ paste করুন (একাধিক লাইনও চলবে)। ২) App নিজেই বুঝে নেবে কোনটা বদলাবে। ৩) নিচের table-এ দরকার হলে বদলে নিন।</p>
+<textarea id="bp" rows="6" spellcheck="false" placeholder="/ip/address/add address=103.147.183.30/30 interface=ether1 comment=&quot;Uplink-IP&quot;&#10;&#10;অথবা আপনার নোটের মতো:&#10;/queue/simple/&#10;set [find name=&quot;BDIX-VENUS&quot;] target=10.20.7.0/24&#10;set [find name=&quot;FNA-VENUS&quot;] target=10.20.7.0/24"></textarea><div id="bt"></div></div>
+<div id="pm" class="dl" style="padding:0">
+<div class="row"><input id="ik" placeholder="field নাম (যেমন ip)" style="flex:1;min-width:130px"><select id="it" style="flex:1;min-width:140px"><option value="i">Input</option><option value="d">Input + default</option><option value="s">Dropdown</option><option value="l">List (একাধিক লাইন)</option><option value="o">Optional অংশ</option></select><input id="iv" placeholder="default বা a|b|c" style="flex:1;min-width:130px"><button class="b g" id="ia">Cursor-এ বসান</button></div>
+<div id="bl"></div>
+<details id="advBody"${o.body?' open':''}><summary>Advanced: template body (চাইলে হাতে edit করা যায়)</summary><textarea id="bb" rows="6" spellcheck="false" placeholder="/ip/address/add address={{addr}} interface={{iface=ether1}}{? comment=&quot;{{comment}}&quot;?}"></textarea></details>
+<div class="help"><code>{{key}}</code> field · <code>{{key=default}}</code> · <code>{{key=a|b|c}}</code> dropdown · <code>{{key*}}</code> একাধিক লাইন (প্রতিটির জন্য আলাদা command) · <code>{? comment="{{comment}}" ?}</code> optional অংশ</div></div>
+
+<div class="g3">
+  <label><span>Template name</span><input id="bn" value="${esc(o.name||'')}"></label>
+  <label>
+    <span>Category (তালিকা থেকে বাছুন বা নতুন লিখুন)</span>
+    <div class="cat-wrap">
+      <select id="bcatSel" title="আগের Category সমূহ">
+        <option value="__new__">+ নতুন লিখুন</option>
+        ${existingCats.map(c=>`<option value="${esc(c)}"${c===initCat?' selected':''}>${esc(c)}</option>`).join('')}
+      </select>
+      <input id="bcat" placeholder="Category নাম লিখুন" value="${esc(initCat)}">
+    </div>
+  </label>
+  <label><span>Description</span><input id="bd" value="${esc(o.desc||'')}"></label>
+</div>
+
+<div class="dpv"><b>Test output (আপনার দেওয়া value দিয়ে)</b><pre id="bv"></pre></div>
+<details><summary>Presets (এক ক্লিকে value বসানোর chip)</summary><textarea id="bpr" rows="3" spellcheck="false" placeholder="OLT: toport=80; proto=tcp; comment=Main-olt&#10;SSH: toport=22; proto=tcp; comment=SSH"></textarea></details>
+${isM()?`<label class="tg"><input type="checkbox" id="bmo"${o.mo?' checked':''}> শুধু Master দেখতে পাবে</label>`:''}
+<div class="row"><button class="b" id="bs">Save</button>${o.id?'<button class="b d" id="bdel">Delete</button>':''}<button class="b g" id="bc2">Cancel</button></div></div>`;
+
+  // Sync Category Dropdown & Manual Input seamlessly
+  const catSel = $d('#bcatSel'), catInp = $d('#bcat');
+  catSel.onchange = () => {
+    tch.c = 1;
+    if(catSel.value === '__new__'){ catInp.value = ''; catInp.focus(); }
+    else { catInp.value = catSel.value; }
+  };
+  catInp.oninput = () => {
+    tch.c = 1;
+    const match = existingCats.find(c => c.toLowerCase() === catInp.value.trim().toLowerCase());
+    catSel.value = match || '__new__';
+  };
+
+  const show=p=>{$d('#ps').hidden=p!=='s';$d('#pm').hidden=p!=='m';d.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.p===p))};
+  const parsePre=s=>{const r={};s.split('\n').forEach(l=>{const i=l.indexOf(':');if(i<1)return;const v={};l.slice(i+1).split(';').forEach(p=>{const j=p.indexOf('=');if(j>0)v[p.slice(0,j).trim()]=p.slice(j+1).trim()});if(Object.keys(v).length)r[l.slice(0,i).trim()]=v});return r};
+  const preTxt=p=>Object.entries(p||{}).map(([n,v])=>n+': '+Object.entries(v).map(([k,x])=>k+'='+x).join('; ')).join('\n');
+  const tbl=()=>{$d('#bt').innerHTML=A.rows.length?`<table class="ft"><tr><th>Field name</th><th>Example</th><th>Type</th><th>Default / Dropdown options</th></tr>${A.rows.map((r,i)=>`<tr data-i="${i}" class="${r.mode==='fixed'?'fx':''}"><td><input class="rk" value="${esc(r.key)}"></td><td class="ex">${esc(r.ex.replace(/\n/g,' , '))}</td><td><select class="rm">${MODES.map(([v,l])=>`<option value="${v}"${v===r.mode?' selected':''}>${l}</option>`).join('')}</select></td><td><input class="rd" value="${esc(r.mode==='sel'?r.opts:r.def)}"${r.mode==='fixed'?' disabled':''}></td></tr>`).join('')}</table>`:''};
+  const labTbl=()=>{const F=fieldsOf({body:$d('#bb').value,labels:labs});$d('#bl').innerHTML=F.length?`<table class="ft"><tr><th>Field</th><th>Label (form-এ যা দেখাবে)</th></tr>${F.map(f=>`<tr><td class="ex">${esc(f.k)}${f.list?' *':''}${f.opt?' ?':''}</td><td><input data-lk="${esc(f.k)}" value="${esc(labs[f.k]||f.label)}"></td></tr>`).join('')}</table>`:''};
+  const prev=()=>{const t={body:$d('#bb').value,labels:{}},ex={};A.rows.forEach(r=>ex[r.key]=r.ex);
+    try{const L=render(t,{...defs(t),...ex});$d('#bv').textContent=(grp?group(L):L).join('\n')||'—'}catch(e){$d('#bv').textContent='Error: '+e.message}};
+  const gen=()=>{$d('#bb').value=bodyOf(A.lines,A.rows);labTbl()};
+  const an=()=>{const v=$d('#bp').value;
+    if(!v.trim()){A={lines:[],rows:[]};tbl();if(!o.body)$d('#bb').value='';labTbl();prev();return}
+    A=analyze(v);const L=A.lines.filter(l=>!l.raw),f=L[0];
+    A.rows.forEach(r=>{if(r.mode!=='fixed'&&!labs[r.key])labs[r.key]=cap(r.key.replace(/[-_]/g,' '))});
+    if(f){const cats=new Set(L.map(l=>catOf(l.path)));
+      if(!tch.n)$d('#bn').value=((f.segs.length?tc(f.path)+' ':'')+cap(f.verb)).trim()+(A.lines.length>1?' (+'+(A.lines.length-1)+')':'');
+      if(!tch.c){
+        const autoCat = cats.size===1?[...cats][0]:'Custom';
+        catInp.value = autoCat;
+        catSel.value = existingCats.includes(autoCat) ? autoCat : '__new__';
+      }
+      if(!tch.d)$d('#bd').value=A.lines.length+' command · '+A.rows.filter(r=>r.mode!=='fixed').length+' field'}
+    tbl();gen();prev()};
+  $d('#bp').oninput=()=>{clearTimeout(tm);tm=setTimeout(an,150)};
+  $d('#bn').oninput=()=>tch.n=1;$d('#bd').oninput=()=>tch.d=1;
+  $d('#bb').value=o.body||'';
+  $d('#bb').oninput=()=>{A.rows=[];tbl();labTbl();prev()};
+  $d('#bl').addEventListener('input',e=>{const k=e.target.dataset.lk;if(k)labs[k]=e.target.value});
+  $d('#bt').addEventListener('input',e=>{const tr=e.target.closest('tr[data-i]');if(!tr)return;const r=A.rows[tr.dataset.i],c=e.target.classList;
+    if(c.contains('rk'))r.key=e.target.value.trim().replace(/[^\w-]/g,'-')||'field';
+    else if(c.contains('rd')){if(r.mode==='sel')r.opts=e.target.value;else r.def=e.target.value}else return;
+    gen();prev()});
+  $d('#bt').addEventListener('change',e=>{if(!e.target.classList.contains('rm'))return;const r=A.rows[e.target.closest('tr').dataset.i];
+    r.mode=e.target.value;if(r.mode==='sel'&&!r.opts)r.opts=r.ex.split('\n')[0];if(r.mode==='list'&&!r.def)r.def=r.ex.split('\n').join('|');
+    tbl();gen();prev()});
+  $d('#ia').onclick=()=>{const k=($d('#ik').value.trim()||'field').replace(/[^\w-]/g,'-'),v=$d('#iv').value.trim(),t=$d('#it').value;
+    const s=t==='i'?`{{${k}}}`:(t==='d'||t==='s')?`{{${k}=${v}}}`:t==='l'?`{{${k}*${v?'='+v:''}}}`:`{? ${k}={{${k}}}?}`;
+    const adv=$d('#advBody');if(adv)adv.open=true;
+    const b=$d('#bb');b.setRangeText(s,b.selectionStart,b.selectionEnd,'end');b.focus();A.rows=[];tbl();labTbl();prev()};
+  d.querySelectorAll('.tab').forEach(b=>b.onclick=()=>show(b.dataset.p));
+  const close=()=>{if(builderDirty&&!confirm('Template editor-এ unsaved changes আছে। Save না করে বন্ধ করবেন?'))return;builderDirty=false;if(back)back();else d.close()};$d('#bx').onclick=close;$d('#bc2').onclick=close;d.oncancel=e=>{if(builderDirty&&!confirm('Template editor-এ unsaved changes আছে। Save না করে বন্ধ করবেন?'))e.preventDefault();else builderDirty=false};d.oninput=e=>{if(['bn','bcat','bd','bb','bpr','bp','ik','iv'].includes(e.target.id)||e.target.closest('#bt')||e.target.closest('#bl'))builderDirty=true};d.onchange=e=>{if(e.target.closest('#bt')||e.target.closest('#bl')||['bcatSel','it'].includes(e.target.id))builderDirty=true};
+  $d('#bs').onclick=()=>{const name=$d('#bn').value.trim(),body=$d('#bb').value.trim();if(!name||!body)return alert('Template name ও command দিন');
+    const labels={};fieldsOf({body,labels:labs}).forEach(f=>{if(labs[f.k])labels[f.k]=labs[f.k]});
+    const t={id:o.id||'c'+Date.now().toString(36),cat:catInp.value.trim()||'Custom',name,desc:$d('#bd').value.trim(),body,labels,presets:parsePre($d('#bpr').value),mo:isM()?$d('#bmo').checked:!!o.mo,src:o.src||'custom',owner:o.owner||me().u,pv:o.pv,mod:true};
+    saveT(t);builderDirty=false;if(back)back();else{d.close();setT(t.id)}};
+  const del=$d('#bdel');if(del)del.onclick=()=>{if(confirm('Template delete করবেন?')){builderDirty=false;delT(o.id);if(back)back();else{d.close();setT(cur)}}};
+  show(o.body?'m':'s');$d('#bpr').value=preTxt(o.presets);tbl();labTbl();prev();d.showModal();
+  if(window.gsap) gsap.fromTo(d,{scale:.95,opacity:0},{scale:1,opacity:1,duration:.25,ease:'power2.out'});
+}
+
+/* ===================== Excel Database Link (File System Access API + SheetJS) ===================== */
+let xlHandle = null;
+let xlFileName = LS.get('mt_xl_name', '');
+
+function usersToSheetRows(){
+  return ws.users.map(u => {
+    const a = u.allow || {};
+    return {
+      Username: u.u,
+      DisplayName: u.name || '',
+      Role: u.role || 'user',
+      Status: u.active === false ? 'disabled' : 'active',
+      PasswordHash: u.hash || '',
+      Salt: u.salt || '',
+      CanCreate: u.canCreate ? 'YES' : 'NO',
+      CanCopy: u.canCopy !== false ? 'YES' : 'NO',
+      CanSave: u.canSave !== false ? 'YES' : 'NO',
+      CanBasket: u.canBasket !== false ? 'YES' : 'NO',
+      MaxEntries: u.maxE || 10,
+      AllowedAll: a.all ? 'YES' : 'NO',
+      AllowedCats: (a.cats || []).join(','),
+      AllowedIDs: (a.ids || []).join(','),
+      CmdToggleAll: a.cmdToggleAll ? 'YES' : 'NO',
+      CmdToggleIDs: (a.cmdToggleIds || []).join(','),
+      CreatedAt: u.createdAt || new Date().toISOString().slice(0,10)
+    };
+  });
+}
+
+function buildWorkbookBuffer(){
+  if(!window.XLSX) return null;
+  const rows = usersToSheetRows();
+  const sheet = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, sheet, 'Users');
+  return XLSX.write(wb, {bookType:'xlsx', type:'array'});
+}
+
+async function syncUsersToExcel(autoDownloadFallback = false){
+  try{
+    const buf = buildWorkbookBuffer();
+    if(!buf) return;
+    if(xlHandle){
+      const writable = await xlHandle.createWritable();
+      await writable.write(buf);
+      await writable.close();
+      toast('Excel database auto-updated (' + xlFileName + ')');
+      return true;
+    } else if(autoDownloadFallback){
+      const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'mikrotik_users_db.xlsx';
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 500);
+      toast('Excel file (mikrotik_users_db.xlsx) download হয়েছে');
+      return true;
+    }
+  }catch(e){
+    console.warn('Excel sync error:', e);
+  }
+  return false;
+}
+
+function importUsersFromWorkbook(wb, silent=false){
+  const sheetName = wb.SheetNames[0];
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName]);
+  if(!Array.isArray(rows)) return 0;
+  let count = 0;
+  rows.forEach(r => {
+    const uname = String(r.Username || '').trim();
+    if(!uname) return;
+    const existing = ws.users.find(x => x.u === uname);
+    const parsedUser = {
+      u: uname,
+      name: String(r.DisplayName || uname).trim(),
+      role: String(r.Role || 'user').toLowerCase() === 'master' ? 'master' : 'user',
+      active: String(r.Status || 'active').toLowerCase() !== 'disabled',
+      hash: String(r.PasswordHash || existing?.hash || ''),
+      salt: String(r.Salt || existing?.salt || ''),
+      canCreate: String(r.CanCreate || 'NO').toUpperCase() === 'YES',
+      canCopy: String(r.CanCopy || 'YES').toUpperCase() !== 'NO',
+      canSave: String(r.CanSave || 'YES').toUpperCase() !== 'NO',
+      canBasket: String(r.CanBasket || 'YES').toUpperCase() !== 'NO',
+      maxE: Number(r.MaxEntries) || 10,
+      createdAt: String(r.CreatedAt || new Date().toISOString().slice(0,10)),
+      allow: {
+        all: String(r.AllowedAll || 'NO').toUpperCase() === 'YES',
+        cats: String(r.AllowedCats || '').split(',').map(s=>s.trim()).filter(Boolean),
+        ids: String(r.AllowedIDs || '').split(',').map(s=>s.trim()).filter(Boolean),
+        cmdToggleAll: String(r.CmdToggleAll || 'NO').toUpperCase() === 'YES',
+        cmdToggleIds: String(r.CmdToggleIDs || '').split(',').map(s=>s.trim()).filter(Boolean)
+      }
+    };
+    if(existing){
+      Object.assign(existing, parsedUser);
+    } else if(parsedUser.hash && parsedUser.salt){
+      ws.users.push(parsedUser);
+    }
+    count++;
+  });
+  persist();
+  if(!silent) toast(count + 'টি user Excel থেকে sync হয়েছে');
+  return count;
+}
+
+async function linkExcelFile(){
+  try{
+    if(window.showOpenFilePicker){
+      const [handle] = await window.showOpenFilePicker({
+        types:[{description:'Excel Workbook',accept:{'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':['.xlsx']}}],
+        multiple:false
+      });
+      xlHandle = handle;
+      xlFileName = handle.name;
+      LS.set('mt_xl_name', xlFileName);
+      const file = await handle.getFile();
+      const data = await file.arrayBuffer();
+      const wb = XLSX.read(data, {type:'array'});
+      importUsersFromWorkbook(wb, false);
+      await syncUsersToExcel(false);
+      return true;
+    } else {
+      alert('আপনার browser-এ সরাসরি ফাইল লক করার API নেই। নিচের "Import Excel" বা "Export Excel" বাটন ব্যবহার করুন।');
+    }
+  }catch(e){}
+  return false;
+}
+
+/* ===================== Workspace / Auth / Admin ===================== */
+const APP_VER='4.1 Pro Upgrade',PACK_VER=2;
+let seed=null,session=null,ws,packMsg=null,fails=0;
+try{session=sessionStorage.getItem('mt_sess')||LS.get('mt_sess',null)}catch(e){}
+try{seed=JSON.parse(document.getElementById('seed').textContent)}catch(e){}
+
+const persist=()=>LS.set('mt_ws',ws);
+let lastCommittedWorkspace=null,undoStack=LS.get('mt_undo',[]),redoStack=LS.get('mt_redo',[]);
+function cloneWS(v){try{return JSON.parse(JSON.stringify(v))}catch(e){return null}}
+function recordActivity(action){const log=LS.get('mt_activity',[]);log.unshift({at:new Date().toISOString(),user:session||'guest',action});LS.set('mt_activity',log.slice(0,250));}
+const commit=()=>{
+  if(lastCommittedWorkspace){undoStack.push(cloneWS(lastCommittedWorkspace));undoStack=undoStack.slice(-8);LS.set('mt_undo',undoStack);redoStack=[];LS.set('mt_redo',redoStack)}
+  if(isM()) ws.rev=(ws.rev||0)+1;
+  const localSaved=persist();lastCommittedWorkspace=cloneWS(ws);recordActivity('Workspace/template/user data saved');
+  markHtmlDirty(true,localSaved?'● Local autosave complete · HTML sync pending':'⚠ Local save failed · storage space/settings issue · HTML sync pending');if(!localSaved)toast('Local auto-save failed! Browser storage check করুন।')
+  if(xlHandle) syncUsersToExcel(false);
+};
+
+function loadWS(){ws=LS.get('mt_ws',null);
+  if(seed&&seed.users&&(!ws||(seed.rev||0)>(ws.rev||0))){
+    const mine=ws?(ws.tpls||[]).filter(t=>t.owner&&t.owner!=='master'&&!seed.tpls.some(s=>s.id===t.id)):[];
+    ws=JSON.parse(JSON.stringify(seed));ws.tpls.push(...mine);persist()}
+  if(!ws)ws={v:4,rev:0,packVer:0,allowSignup:true,users:[],tpls:[],removed:[]};
+  if(ws.allowSignup === undefined) ws.allowSignup = true;
+}
+
+const me=()=>ws.users.find(u=>u.u===session);
+function isM(){const u=me();return !!u&&u.role==='master'}
+function visFor(u){if(u.role==='master')return ws.tpls;const a=u.allow||{};
+  return ws.tpls.filter(t=>!t.mo&&(t.owner===u.u||a.all||(a.cats||[]).includes(t.cat)||(a.ids||[]).includes(t.id)))}
+function vis(){const u=me();return u?visFor(u):[]}
+const canEdit=t=>isM()||(!!me()&&me().canCreate===true&&t.owner===me().u);
+const P=k=>isM()||(!!me()&&me()[k]!==false);
+const maxE=()=>isM()?99:(me().maxE||10);
+function saveT(t){const i=ws.tpls.findIndex(x=>x.id===t.id);i>=0?ws.tpls[i]=t:ws.tpls.push(t);commit()}
+function delT(id){const t=ws.tpls.find(x=>x.id===id);if(!t||!canEdit(t))return;ws.tpls=ws.tpls.filter(x=>x.id!==id);if(t.src==='builtin'&&!ws.removed.includes(id))ws.removed.push(id);commit()}
+function mergePack(list,force){let a=0,u=0,s=0;
+  list.forEach(b=>{const i=ws.tpls.findIndex(t=>t.id===b.id);
+    if(i<0){if(force||!ws.removed.includes(b.id)){ws.tpls.push({...b,src:b.src||'builtin',owner:'master',mod:false});a++}}
+    else{const t=ws.tpls[i];if(force||(!t.mod&&(b.pv||1)>(t.pv||1))){ws.tpls[i]={...b,src:t.src,owner:t.owner,mo:t.mo,mod:false};u++}else s++}});
+  return{a,u,s}}
+
+const enc=s=>new TextEncoder().encode(s);
+async function hashPw(pw,salt){const k=await crypto.subtle.importKey('raw',enc(pw),'PBKDF2',false,['deriveBits']);
+  const b=await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:enc(salt),iterations:100000},k,256);
+  return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const rnd=()=>[...crypto.getRandomValues(new Uint8Array(12))].map(b=>b.toString(16).padStart(2,'0')).join('');
+async function mkUser(u,name,pw,extra){
+  const salt=rnd();
+  return{
+    u,name,salt,hash:await hashPw(pw,salt),
+    role:'user',active:true,
+    allow:{all:false,cats:[],ids:[],cmdToggleAll:false,cmdToggleIds:[]},
+    canCreate:false,canCopy:true,canSave:true,canBasket:true,maxE:10,
+    createdAt:new Date().toISOString().slice(0,10),
+    ...extra
+  };
+}
+
+/* ---------- Login & Self-Registration (Create Account) ---------- */
+function showLogin(mode = 'login'){
+  const L=$('#login');
+  const first=!ws.users.length;
+  const signupEnabled = ws.allowSignup !== false;
+  if(first) mode = 'first';
+  else if(mode === 'register' && !signupEnabled) mode = 'login';
+  $('#app').hidden=true;L.hidden=false;
+
+  const isReg = mode === 'register';
+  const title = first ? 'প্রথমবার setup: Master account বানান' : isReg ? 'নতুন Account তৈরি করুন' : 'Login';
+  const btnTxt = first ? 'Master account তৈরি করুন' : isReg ? 'Create Account & Save to Excel' : 'Login';
+
+  L.innerHTML=`<form class="lgc" id="lf">
+    <div class="brand"><span class="logo">⚡</span><div>Script Studio<small>MikroTik RouterOS v7 · v${APP_VER}</small><small class="devbrand">Develop by Faridu</small></div></div>
+    <h2>${title}</h2>
+    ${isReg ? `<label><span>Full / Display Name</span><input id="ln" placeholder="আপনার নাম" required></label>` : ''}
+    <label><span>Username</span><input id="lu" autocomplete="username" placeholder="যেমন: rahim_net" required></label>
+    <label><span>Password</span><input id="lp" type="password" autocomplete="${first||isReg?'new-password':'current-password'}" placeholder="কমপক্ষে ৬ অক্ষর" required></label>
+    ${first||isReg ? '<label><span>Password আবার দিন</span><input id="lp2" type="password" autocomplete="new-password" required></label>' : '<label class="tg"><input type="checkbox" id="lr"> এই device-এ মনে রাখুন</label>'}
+    ${isReg ? `<div class="help" style="font-size:11.5px">নতুন account তৈরি হলে আপনার তথ্য ডাটাবেস ও Excel sheet-এ সংরক্ষিত হবে এবং Master user আপনার অনুমতি নিয়ন্ত্রণ করবেন।</div>` : ''}
+    <div id="le" class="err"></div>
+    <button class="b" type="submit">${btnTxt}</button>
+    ${!first ? `<div class="row" style="justify-content:space-between;margin-top:4px">
+      ${isReg
+        ? '<button type="button" class="lnk" id="toLogin">← আগের account আছে? Login করুন</button>'
+        : (signupEnabled
+            ? '<button type="button" class="lnk" id="toReg">＋ Create Account (নতুন একাউন্ট খুলুন)</button>'
+            : '<span class="note" style="font-size:11.5px">🔒 নতুন একাউন্ট খোলা Master কর্তৃক বন্ধ আছে</span>')}
+    </div>` : ''}
+    ${first?'':'<button type="button" class="lnk" id="lz" style="text-align:left;color:var(--mu)">Password ভুলে গেছেন? এই device-এর data reset</button>'}
+  </form>`;
+
+  if(window.gsap) gsap.fromTo('.lgc',{y:20,opacity:0,scale:.96},{y:0,opacity:1,scale:1,duration:.4,ease:'power3.out'});
+
+  const err=m=>$('#le').textContent=m;
+  if($('#toReg')) $('#toReg').onclick = () => showLogin('register');
+  if($('#toLogin')) $('#toLogin').onclick = () => showLogin('login');
+
+  $('#lf').onsubmit=async e=>{
+    e.preventDefault();
+    const u=$('#lu').value.trim(),p=$('#lp').value;
+    if(!window.crypto||!crypto.subtle)return err('এই browser-এ crypto নেই। Chrome/Edge ব্যবহার করুন।');
+
+    if(first){
+      if(!/^[\w.-]{3,}$/.test(u))return err('Username কমপক্ষে ৩ অক্ষর (a-z 0-9 . _ -)');
+      if(p.length<6)return err('Password কমপক্ষে ৬ অক্ষর');
+      if(p!==$('#lp2').value)return err('Password মেলেনি');
+      ws.users=[await mkUser(u,'Master',p,{role:'master',allow:{all:true,cats:[],ids:[],cmdToggleAll:true,cmdToggleIds:[]}})];
+      persist();
+      await syncUsersToExcel(true);
+      return enter(u,false);
+    }
+
+    if(isReg){
+      if(ws.allowSignup === false) return err('Master user নতুন একাউন্ট তৈরি করা বন্ধ রেখেছেন।');
+      const dname = $('#ln').value.trim() || u;
+      if(!/^[\w.-]{3,}$/.test(u))return err('Username কমপক্ষে ৩ অক্ষর (a-z 0-9 . _ -)');
+      if(ws.users.some(x=>x.u.toLowerCase()===u.toLowerCase()))return err('এই username ইতিমধ্যে ব্যবহৃত হয়েছে!');
+      if(p.length<6)return err('Password কমপক্ষে ৬ অক্ষর');
+      if(p!==$('#lp2').value)return err('Password মেলেনি');
+
+      const newU = await mkUser(u, dname, p, {
+        role: 'user',
+        active: true,
+        allow: {all: false, cats: [], ids: [], cmdToggleAll: false, cmdToggleIds: []}
+      });
+      ws.users.push(newU);
+      persist();
+      await syncUsersToExcel(!xlHandle);
+      toast('Account তৈরি হয়েছে এবং Excel database-এ যুক্ত হয়েছে!');
+      return enter(u, false);
+    }
+
+    if(fails>=5)return err('অনেকবার ভুল। ৩০ সেকেন্ড পরে চেষ্টা করুন।');
+    const x=ws.users.find(v=>v.u===u);
+    if(!x||x.active===false||await hashPw(p,x.salt)!==x.hash){if(++fails>=5)setTimeout(()=>fails=0,30000);return err('Username বা password ভুল (বা account বন্ধ)')}
+    fails=0;enter(u,$('#lr').checked);
+  };
+
+  $('#lu').focus();
+  const z=$('#lz');
+  if(z)z.onclick=()=>{if(confirm('এই device-এর সব local data মুছবে (embedded config থাকলে সেটা ফিরে আসবে)। চালিয়ে যাবেন?')){try{Object.keys(localStorage).filter(k=>k.startsWith('mt_')).forEach(k=>localStorage.removeItem(k));sessionStorage.clear()}catch(e){}location.reload()}};
+}
+
+function enter(u,rem){session=u;try{sessionStorage.setItem('mt_sess',u);LS.set('mt_sess',rem?u:null)}catch(e){}startApp()}
+function logout(){session=null;try{sessionStorage.removeItem('mt_sess')}catch(e){}LS.set('mt_sess',null);const d=$('#dlg');if(d.open)d.close();showLogin()}
+
+function startApp(){
+  const u=me();if(!u||u.active===false)return showLogin();
+  if(u.role==='master'&&(ws.packVer||0)<PACK_VER){packMsg=mergePack(BUILTIN.map(b=>({...b,pv:PACK_VER})));ws.packVer=PACK_VER;commit()}
+  $('#login').hidden=true;$('#app').hidden=false;bk=LS.get('mt_bk:'+session,'');
+  $('#uchip').innerHTML=`<b>${esc(u.name||u.u)}</b><small>${u.role==='master'?'👑 Master':'👤 User'} · ${esc(u.u)}</small>`;
+  $('#adm').hidden=u.role!=='master';$('#newT').hidden=!(isM()||u.canCreate===true);
+  $('#updHtmlBtn').hidden = !isM();
+  $('#saveStatus').hidden = !isM();
+  $('#ackHtmlSync').hidden = !isM();
+  $('#proBtn').hidden = !(isM() || u.canProTools === true);
+  $('#bcopy').hidden=!P('canCopy');$('#bsave').hidden=!P('canSave');$('#bkp').hidden=!P('canBasket');$('#app').classList.toggle('nobk',!P('canBasket'));
+  sync();setT(cur);
+  animateEntrance();
+  if(packMsg&&(packMsg.a||packMsg.u)){toast('Template pack: +'+packMsg.a+' নতুন, '+packMsg.u+' update');packMsg=null}
+}
+
+/* ---------- Direct HTML File In-Place Updater & Exact Pristine Export ---------- */
+let htmlFileHandle = null;
+let hasUnsavedHtmlChanges = false;
+
+function markHtmlDirty(dirty = true, stateText=''){
+  hasUnsavedHtmlChanges = dirty;
+  const btn = $('#updHtmlBtn'),status=$('#saveStatus'),ack=$('#ackHtmlSync');
+  if(btn){
+    btn.classList.toggle('dirty', dirty);
+    btn.innerHTML = dirty
+      ? '💾 Sync HTML <span style="font-size:10px;background:#fff2;padding:1px 6px;border-radius:99px">Unsaved</span>'
+      : (htmlFileHandle ? '✅ HTML Synced (' + esc(htmlFileHandle.name) + ')' : '💾 Sync HTML');
+  }
+  if(status)status.textContent=stateText||(dirty?'● Saved locally · HTML sync pending':'● Saved locally · HTML synced');if(ack)ack.hidden=!(dirty&&!window.showOpenFilePicker);}
+
+function buildUpdatedHtmlString(targetUser = ''){
+  const w = JSON.parse(JSON.stringify(ws));
+  if(targetUser){
+    const x = ws.users.find(v => v.u === targetUser);
+    w.users = [x];
+    w.tpls = visFor(x).map(t => ({...t}));
+    w.removed = [];
+  }
+  const j = JSON.stringify(w).replace(/</g, '\\u003c');
+  return RAW_HTML.replace(/(<script type="application\/json" id="seed">)[\s\S]*?(<\/script>)/, (m, a, b) => a + j + b);
+}
+
+async function updateSameHtmlFile(forcePickNew = false){
+  try{
+    const updatedSource = buildUpdatedHtmlString('');
+    if(window.showOpenFilePicker){
+      if(!htmlFileHandle || forcePickNew){
+        const [handle] = await window.showOpenFilePicker({
+          types: [{description: 'HTML Application File', accept: {'text/html': ['.html', '.htm']}}],
+          multiple: false
+        });
+        htmlFileHandle = handle;
+      }
+      if(htmlFileHandle.requestPermission){
+        const permission=await htmlFileHandle.requestPermission({mode:'readwrite'});
+        if(permission!=='granted')throw new Error('File write permission granted হয়নি। আবার file select করুন।');
+      }
+      const writable = await htmlFileHandle.createWritable();
+      try{await writable.write(updatedSource);await writable.close();}
+      catch(err){try{await writable.abort()}catch(_e){}throw err}
+      markHtmlDirty(false,'● Local autosave complete · HTML synced to '+htmlFileHandle.name);
+      toast('সফলভাবে HTML ফাইল (' + htmlFileHandle.name + ') আপডেট হয়েছে!');
+      return true;
+    } else {
+      const fname = (location.pathname.split('/').pop() || 'MikroTik_Script_Studio_Pro_v3_Upgrade.html');
+      dl(fname, updatedSource);
+      markHtmlDirty(true,'● Local autosave complete · HTML downloaded—replace old file to sync');
+      toast('HTML download হয়েছে—পুরোনো ফাইলটি এই download দিয়ে replace করুন। Sync status pending থাকবে।');
+      return true;
+    }
+  }catch(e){
+    if(e && e.name !== 'AbortError'){
+      markHtmlDirty(true,'● Local autosave complete · HTML sync failed');
+      alert('ফাইল আপডেট করতে সমস্যা হয়েছে: ' + e.message + '\nআপনি চাইলে Sync HTML button থেকে আবার file select করুন।');
+    }
+  }
+  return false;
+}
+
+function edition(u){
+  const cleanHtml = buildUpdatedHtmlString(u);
+  dl('mikrotik-studio-'+(u||'team')+'.html', cleanHtml);
+}
+
+/* ---------- Admin Panel (Users, Role Control, Excel Link, Templates, Backup) ---------- */
+function admin(tab){
+  if(!isM() && me().canProTools !== true)return;tab=tab||'u';if(!isM())tab='x';
+  const d=$('#dlg'),$d=s=>d.querySelector(s);d.className='wide';d.onclose=()=>setT(cur);
+  d.innerHTML=`<div class="dl">
+    <div class="dh"><h2>Admin Control Center</h2><button class="x" id="ax">✕</button></div>
+    <div class="tabs"${isM()?'':' style=\"display:none\"'}>
+      ${[['u','Users &amp; Excel DB'],['t','Templates'],['x','Pro Tools'],['b','Backup &amp; Upgrade']].map(([k,l])=>`<button class="tab${k===tab?' on':''}" data-t="${k}">${l}</button>`).join('')}
+    </div>
+    <div id="ap"></div>
+  </div>`;
+  $d('#ax').onclick=()=>d.close();d.querySelectorAll('.tab').forEach(b=>b.onclick=()=>admin(b.dataset.t));
+  const ap=$d('#ap');
+
+  if(tab==='u'){
+    const signupOn = ws.allowSignup !== false;
+    ap.innerHTML=`
+    <div class="card" style="padding:12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div>
+        <b>🌐 Public Account Creation (Self-Signup)</b>
+        <div class="note" style="margin-top:2px">${signupOn ? '✅ চালু আছে — লগইন পেজ থেকে নতুন ইউজার একাউন্ট খুলতে পারবে' : '🔒 বন্ধ আছে — শুধুমাত্র Master নতুন ইউজার তৈরি করতে পারবে'}</div>
+      </div>
+      <label class="tg" style="background:var(--sf2);padding:7px 13px;border-radius:10px;border:1px solid var(--bd);font-weight:600">
+        <input type="checkbox" id="togSignup"${signupOn?' checked':''}> Create Account চালু রাখুন
+      </label>
+    </div>
+
+    <div class="card" style="padding:12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <div>
+        <b>📊 Excel Credential Database</b>
+        <div style="margin-top:4px">${xlHandle ? `<span class="xl-badge">● Linked: ${esc(xlFileName)} (Auto-Sync চালু)</span>` : `<span class="xl-badge warn">● Linked নেই (Browser Local Storage চালু)</span>`}</div>
+      </div>
+      <div class="row">
+        <button class="b g sm" id="xlLink">🔗 Link Excel (.xlsx)</button>
+        <button class="b g sm" id="xlExp">⬇ Export Excel</button>
+        <label class="b g sm" style="cursor:pointer">⬆ Import Excel<input type="file" id="xlImp" hidden accept=".xlsx,.xls,.csv"></label>
+      </div>
+    </div>
+
+    <table class="ft">
+      <tr><th>User &amp; Role</th><th>Template Access</th><th>Cmd Toggle Button</th><th>Limits</th><th></th></tr>
+      ${ws.users.map(u=>{
+        const m=u.role==='master',a=u.allow||{};
+        const cmdInfo = m ? 'সব command' : a.cmdToggleAll ? 'সব allowed template' : ((a.cmdToggleIds||[]).length + ' template');
+        return`<tr>
+          <td><b>${esc(u.u)}</b> <span class="mu">${esc(u.name||'')}</span>${m?' <span class="pill">Master</span>':' <span class="pill" style="opacity:.75">Regular</span>'}${u.active===false?' <em>(বন্ধ)</em>':''}</td>
+          <td>${m||a.all?'সব template':(a.cats||[]).length+' cat, '+(a.ids||[]).length+' tpl'}</td>
+          <td class="ex">${cmdInfo}</td>
+          <td class="ex">${m?'Full Access':[u.canCreate?'create':'',u.canCopy===false?'no-copy':'',u.canSave===false?'no-save':'',u.canBasket===false?'no-basket':'','max '+(u.maxE||10)].filter(Boolean).join(' · ')}</td>
+          <td><div class="row">
+            <button class="b g sm" data-ue="${esc(u.u)}">Edit</button>
+            <button class="b g sm" data-ex="${esc(u.u)}">Edition .html</button>
+            ${u.u===me().u?'':`<button class="b d sm" data-ud="${esc(u.u)}">Delete</button>`}
+          </div></td>
+        </tr>`;
+      }).join('')}
+    </table>
+    <div class="row"><button class="b" id="un">＋ New user</button></div>
+    <p class="note">"Edition .html" = ঐ user-এর জন্য আলাদা app file। মূল সোর্স কোডে কোনো পরিবর্তন ছাড়াই শুধু ঐ user-এর data ও allowed template embed করে download হয়।</p>`;
+
+    $d('#togSignup').onchange = e => {
+      ws.allowSignup = e.target.checked;
+      commit();
+      toast(ws.allowSignup ? 'Create Account অপশন চালু করা হয়েছে' : 'Create Account অপশন বন্ধ করা হয়েছে');
+      admin('u');
+    };
+    $d('#xlLink').onclick = async () => { if(await linkExcelFile()) admin('u'); };
+    $d('#xlExp').onclick = () => syncUsersToExcel(true);
+    $d('#xlImp').onchange = e => {
+      const f = e.target.files[0];
+      if(f) f.arrayBuffer().then(buf => {
+        const wb = XLSX.read(buf, {type:'array'});
+        importUsersFromWorkbook(wb, false);
+        admin('u');
+      });
+    };
+
+    ap.onclick=e=>{const b=e.target.closest('button');if(!b)return;
+      if(b.id==='un')userForm('');
+      else if(b.dataset.ue)userForm(b.dataset.ue);
+      else if(b.dataset.ex)edition(b.dataset.ex);
+      else if(b.dataset.ud&&confirm('User delete করবেন? (তার template master-এর নামে থাকবে)')){
+        ws.tpls.forEach(t=>{if(t.owner===b.dataset.ud)t.owner='master'});
+        ws.users=ws.users.filter(x=>x.u!==b.dataset.ud);
+        commit();admin('u');
+      }
+    };
+  }
+  else if(tab==='t'){
+    const L=[...ws.tpls].sort((a,b)=>a.cat.localeCompare(b.cat)||a.name.localeCompare(b.name));
+    ap.innerHTML=`<table class="ft"><tr><th>Template</th><th>Category</th><th>Source</th><th>Master only</th><th></th></tr>${L.map(t=>`<tr><td>${esc(t.name)}</td><td class="ex">${esc(t.cat)}</td><td class="ex">${t.src==='builtin'?(t.mod?'built-in (edited)':'built-in'):esc(t.owner||'custom')}</td><td><input type="checkbox" data-mo="${esc(t.id)}"${t.mo?' checked':''} style="width:auto"></td><td><div class="row"><button class="b g sm" data-te="${esc(t.id)}">Edit</button><button class="b g sm" data-td="${esc(t.id)}">Duplicate</button><button class="b d sm" data-tx="${esc(t.id)}">Delete</button></div></td></tr>`).join('')}</table><div class="row"><button class="b" id="tn">＋ Template builder</button>${ws.removed.length?`<button class="b g" id="tr">Delete করা built-in ফিরিয়ে আনুন (${ws.removed.length})</button>`:''}</div>`;
+    const back=()=>admin('t');
+    ap.onclick=e=>{const b=e.target.closest('button');if(!b)return;const id=b.dataset.te||b.dataset.td||b.dataset.tx,t=ws.tpls.find(x=>x.id===id);
+      if(b.id==='tn')build({cat:'Custom',body:''},back);
+      else if(b.id==='tr'){ws.removed=[];mergePack(BUILTIN.map(x=>({...x,pv:PACK_VER})));commit();admin('t')}
+      else if(b.dataset.te)build(t,back);
+      else if(b.dataset.td)build({...t,id:'',name:t.name+' (copy)',src:'custom',owner:me().u,mo:false,mod:false},back);
+      else if(b.dataset.tx&&confirm('"'+t.name+'" delete করবেন?')){delT(id);admin('t')}};
+    ap.onchange=e=>{const t=ws.tpls.find(x=>x.id===e.target.dataset.mo);if(t){t.mo=e.target.checked;commit()}}}
+  else if(tab==='x'){
+    const favs=LS.get('mt_favorites',[]),hist=LS.get('mt_script_history',[]),activity=LS.get('mt_activity',[]);
+    ap.innerHTML=`<div class="tool-kpi"><div><b>${ws.tpls.length}</b><small>Templates</small></div><div><b>${ws.users.length}</b><small>Users</small></div><div><b>${hist.length}</b><small>Script history</small></div><div><b>${favs.length}</b><small>Favorites</small></div></div>
+    <div class="tool-grid pro-compact" style="margin-top:12px">
+      <section class="tool-card"><h3>🧮 IP / Subnet Calculator & CIDR</h3><label><span>IPv4/CIDR (e.g. 192.168.10.25/24)</span><input id="ipcalcInput" placeholder="192.168.10.25/24"></label><div class="row" style="margin-top:8px"><button class="b sm" id="ipcalcBtn">Calculate</button><button class="b g sm" id="ipcidrBtn">Validate only</button></div><pre class="tool-output" id="ipcalcOut" style="margin-top:8px">Calculation result এখানে দেখাবে।</pre></section>
+      <section class="tool-card"><h3>🛡 Script Validator · Duplicate · Risk</h3><textarea id="validatorText" placeholder="RouterOS script এখানে paste করুন"></textarea><div class="row" style="margin-top:8px"><button class="b sm" id="validateBtn">Analyze script</button><button class="b g sm" id="saveHistBtn">Save to History</button></div><pre class="tool-output" id="validatorOut" style="margin-top:8px">Validator report এখানে দেখাবে।</pre></section>
+      <section class="tool-card"><h3>⚡ Bulk VLAN Builder</h3><p class="note">প্রতি লাইন: VLAN name, VLAN ID, parent interface</p><textarea id="bulkVlan" placeholder="VLAN-101,101,ether1\nVLAN-102,102,ether1"></textarea><button class="b sm" id="bulkVlanBtn" style="margin-top:8px">Generate VLAN Script</button></section>
+      <section class="tool-card"><h3>📶 Bulk Queue Builder</h3><p class="note">প্রতি লাইন: queue name, target IP/CIDR, upload, download (Mbps)</p><textarea id="bulkQueue" placeholder="Customer-A,192.168.1.2/32,10,20\nCustomer-B,192.168.1.3/32,15,30"></textarea><button class="b sm" id="bulkQueueBtn" style="margin-top:8px">Generate Queue Script</button></section>
+      <section class="tool-card"><h3>🌐 Bulk NAT Builder</h3><p class="note">প্রতি লাইন: public IP, public port, private IP, private port, protocol</p><textarea id="bulkNat" placeholder="1.2.3.4,8001,192.168.1.10,80,tcp"></textarea><button class="b sm" id="bulkNatBtn" style="margin-top:8px">Generate NAT Script</button></section>
+      <section class="tool-card"><h3>🧭 BGP Connection Builder</h3><div class="fg"><label><span>Connection name</span><input id="bgpName" value="peer-1"></label><label><span>Local AS</span><input id="bgpAs" placeholder="64512"></label><label><span>Router ID</span><input id="bgpRid" placeholder="1.1.1.1"></label><label><span>Remote IP / prefix</span><input id="bgpRemote" placeholder="2.2.2.2/32"></label><label><span>Remote AS</span><input id="bgpRemoteAs" placeholder="64513"></label><label><span>Template name</span><input id="bgpTemplate" value="default"></label></div><button class="b sm" id="bgpBtn" style="margin-top:8px">Generate BGP</button></section>
+      <section class="tool-card"><h3>🛰️ OLT Port-forward Builder</h3><div class="fg"><label><span>OLT IP</span><input id="oltIp" placeholder="192.168.100.10"></label><label><span>Public IP</span><input id="oltPub" placeholder="1.2.3.4"></label><label><span>Ports (comma separated)</span><input id="oltPorts" value="80,23,161,22"></label><label><span>Comment / name</span><input id="oltComment" value="OLT"></label></div><button class="b sm" id="oltBtn" style="margin-top:8px">Generate OLT NAT</button></section>
+      <section class="tool-card pro-favorites"><h3>⭐ Favorites & Quick Search</h3><input id="quickTemplateSearch" placeholder="Search template name/category/body"><div class="tool-list" id="quickTemplateList" style="margin-top:8px"></div></section>
+      <section class="tool-card"><h3>🕘 Script History</h3><div class="tool-list" id="historyList"></div><button class="b g sm" id="clearHistBtn" style="margin-top:8px">Clear history</button></section>
+      <section class="tool-card"><h3>⭐ Activity Log</h3><div class="tool-list" id="activityList"></div></section>
+    </div><div class="tool-card pro-output" style="margin-top:12px"><h3>Generated script · Copy / Save</h3><textarea id="toolGenerated" style="min-height:180px" placeholder="Generated output এখানে জমা হবে"></textarea><small class="mu">Syntax preview</small><pre class="tool-output" id="syntaxPreview" style="max-height:220px;margin-top:6px"></pre><div class="row" style="margin-top:8px"><button class="b sm" id="toolCopy">Copy script</button><button class="b g sm" id="toolSave">Download .rsc</button><button class="b g sm" id="toolClear">Clear</button><button class="b g sm" id="toolHistSave">Save to history</button><button class="b g sm" id="toolUndo">↶ Undo</button><button class="b g sm" id="toolRedo">↷ Redo</button></div></div>`;
+    const $x=q=>ap.querySelector(q),put=(v)=>{$x('#toolGenerated').value=v;},copyTool=()=>{const v=$x('#toolGenerated').value;if(v)copy(v);};
+    function v4(ip){const a=ip.trim().split('.');return a.length===4&&a.every(x=>/^\d+$/.test(x)&&+x>=0&&+x<=255&&String(+x)===x)}function qrs(s){return '\"'+String(s).replace(/\\/g,'\\\\').replace(/\"/g,'\\\"')+'\"'}
+    function ipnum(ip){return ip.split('.').reduce((n,x)=>(n*256)+(+x),0)}function ipstr(n){return [Math.floor(n/16777216)%256,Math.floor(n/65536)%256,Math.floor(n/256)%256,n%256].join('.')}
+    function parseCidr(raw){const m=raw.trim().match(/^([^/]+)(?:\/(\d{1,2}))?$/);if(!m||!v4(m[1]))return null;const p=m[2]===undefined?32:+m[2];if(p<0||p>32)return null;const n=ipnum(m[1]),mask=p===0?0:(0xffffffff<<(32-p))>>>0,net=(n&mask)>>>0,bcast=(net|(~mask>>>0))>>>0;return{ip:m[1],prefix:p,mask:ipstr(mask>>>0),network:ipstr(net),broadcast:ipstr(bcast),first:p>=31?ipstr(net):ipstr(net+1),last:p>=31?ipstr(bcast):ipstr(bcast-1),total:2**(32-p),usable:p>=31?2**(32-p):Math.max(0,2**(32-p)-2)}}
+    function setGenerated(v){put(v);const pr=$x('#syntaxPreview');if(pr)pr.innerHTML=syntaxPreview(v);}
+    function analyzeScript(script){const lines=script.split(/\r?\n/),cmd=lines.map(l=>l.trim()).filter(l=>l&&!l.startsWith('#'));const counts=new Map();cmd.forEach(c=>counts.set(c,(counts.get(c)||0)+1));const duplicates=[...counts].filter(x=>x[1]>1);const risks=[];if(/\b(remove|reset|reboot|shutdown|format|disable)\b/i.test(script))risks.push('⚠️ Destructive/state-changing command detected (remove/reset/reboot/shutdown/disable). Review target and scope.');if(/\/ip\/firewall\/filter\/(?:remove|disable)|\/ip\/firewall\/nat\/(?:remove|disable)/i.test(script))risks.push('⚠️ Firewall/NAT rule removal or disable detected.');if(/0\.0\.0\.0\/0|dst-address=0\.0\.0\.0\/0/i.test(script))risks.push('⚠️ Default route / broad network match detected; double-check.');if(/password=|secret=/i.test(script))risks.push('🔐 Credentials/secret appears in script. Mask or rotate before sharing.');const badIps=[...script.matchAll(/\b(?:\d{1,3}\.){3}\d{1,3}(?:\/\d{1,2})?\b/g)].map(x=>x[0]).filter(x=>{const ip=x.split('/')[0];return !v4(ip)||(x.includes('/')&&+x.split('/')[1]>32)});const report=`Commands: ${cmd.length}\nDuplicate exact commands: ${duplicates.length}\n${duplicates.map(x=>'  × '+x[0]+' (x'+x[1]+')').join('\n')||'None'}\nInvalid IPv4/CIDR-looking values: ${badIps.length}\n${badIps.join('\n')||'None'}\nRisk alerts: ${risks.length}\n${risks.join('\n')||'No obvious risk patterns detected (not a guarantee of safety).'}\n\nNotes: Validator is heuristic only; RouterOS syntax/version and context still need review.`;return{report,commands:cmd.length,duplicates,risks,badIps};}
+    $x('#ipcalcBtn').onclick=()=>{const r=parseCidr($x('#ipcalcInput').value);$x('#ipcalcOut').textContent=r?`Valid IPv4/CIDR\nIP: ${r.ip}\nPrefix: /${r.prefix}\nSubnet mask: ${r.mask}\nNetwork: ${r.network}\nBroadcast: ${r.broadcast}\nFirst usable: ${r.first}\nLast usable: ${r.last}\nTotal addresses: ${r.total}\nUsable hosts (approx): ${r.usable}`:'❌ Invalid IPv4 or CIDR. Prefix range is /0 to /32.'};
+    $x('#ipcidrBtn').onclick=()=>{$x('#ipcalcOut').textContent=parseCidr($x('#ipcalcInput').value)?'✓ Valid IPv4/CIDR':'✕ Invalid IPv4/CIDR'};
+    $x('#validateBtn').onclick=()=>{$x('#validatorOut').textContent=analyzeScript($x('#validatorText').value).report};
+    $x('#saveHistBtn').onclick=()=>{const script=$x('#validatorText').value.trim();if(!script)return toast('Script empty');const h=LS.get('mt_script_history',[]);h.unshift({at:new Date().toISOString(),script,summary:analyzeScript(script).report.slice(0,120)});LS.set('mt_script_history',h.slice(0,100));admin('x');toast('Script history-তে save হয়েছে')};
+    $x('#bulkVlanBtn').onclick=()=>{const out=[];for(const row of $x('#bulkVlan').value.split(/\r?\n/)){if(!row.trim())continue;const [name,id,parent]=row.split(',').map(x=>x.trim());if(!name||!/^[0-9]+$/.test(id||'')||+id<1||+id>4094||!parent||!/^[A-Za-z0-9_.:/-]+$/.test(parent)){out.push('# INVALID VLAN row: '+row);continue;}out.push(`/interface/vlan/add name=${qrs(name)} vlan-id=${id} interface=${parent}`)}setGenerated(out.join('\n'));};
+    $x('#bulkQueueBtn').onclick=()=>{const out=[];for(const row of $x('#bulkQueue').value.split(/\r?\n/)){if(!row.trim())continue;const [name,target,up,down]=row.split(',').map(x=>x.trim());if(!name||!parseCidr(target||'')||!/^[0-9]+(?:\.[0-9]+)?$/.test(up||'')||!/^[0-9]+(?:\.[0-9]+)?$/.test(down||'')){out.push('# INVALID Queue row: '+row);continue;}out.push(`/queue/simple/add name=${qrs(name)} target=${target} max-limit=${up}M/${down}M`)}setGenerated(out.join('\n'));};
+    $x('#bulkNatBtn').onclick=()=>{const out=[];for(const row of $x('#bulkNat').value.split(/\r?\n/)){if(!row.trim())continue;const [pub,pport,priv,prport,proto]=row.split(',').map(x=>x.trim());if(!v4(pub||'')||!v4(priv||'')||!/^\d{1,5}$/.test(pport||'')||+pport>65535||!/^\d{1,5}$/.test(prport||'')||+prport>65535||!['tcp','udp'].includes((proto||'').toLowerCase())){out.push('# INVALID NAT row: '+row);continue;}out.push(`/ip/firewall/nat/add chain=dstnat action=dst-nat protocol=${proto.toLowerCase()} dst-address=${pub} dst-port=${pport} to-addresses=${priv} to-ports=${prport}`)}setGenerated(out.join('\n'));};
+    $x('#bgpBtn').onclick=()=>{const n=$x('#bgpName').value.trim(),as=$x('#bgpAs').value.trim(),rid=$x('#bgpRid').value.trim(),remote=$x('#bgpRemote').value.trim(),ras=$x('#bgpRemoteAs').value.trim(),tn=$x('#bgpTemplate').value.trim();if(!n||!/^[0-9]+$/.test(as)||!v4(rid)||!parseCidr(remote)||!/^[0-9]+$/.test(ras)||!tn){alert('BGP field check করুন: AS number, Router ID এবং remote IPv4/CIDR');return;}setGenerated(`/routing/bgp/template/add name=${qrs(tn)} as=${as} router-id=${rid}\n/routing/bgp/connection/add name=${qrs(n)} templates=${qrs(tn)} remote.address=${remote} remote.as=${ras}`)};
+    $x('#oltBtn').onclick=()=>{const ip=$x('#oltIp').value.trim(),pub=$x('#oltPub').value.trim(),ports=$x('#oltPorts').value.split(',').map(x=>x.trim()),comment=$x('#oltComment').value.trim();if(!v4(ip)||!v4(pub)||!ports.every(x=>/^[0-9]{1,5}$/.test(x)&&+x<=65535&&+x>=1)){alert('OLT/Public IP এবং port validation check করুন');return;}setGenerated(ports.map((port,i)=>`/ip/firewall/nat/add chain=dstnat action=dst-nat protocol=${i===2?'udp':'tcp'} dst-address=${pub} dst-port=${port} to-addresses=${ip} to-ports=${port} comment=${qrs(comment+'-'+(['Web','Telnet','SNMP','SSH'][i]||'Port'+port))}`).join('\n'))};
+    function renderQuickTemplates(filter=''){const list=ws.tpls.filter(t=>(t.name+' '+t.cat+' '+t.body).toLowerCase().includes(filter.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name));$x('#quickTemplateList').innerHTML=list.map(t=>`<div class="tool-row"><span><b>${esc(t.name)}</b><small class="mu"> · ${esc(t.cat)}</small></span><span><button class="b g sm" data-open-t="${esc(t.id)}">Open</button><button class="b g sm" data-fav-t="${esc(t.id)}">${favs.includes(t.id)?'★':'☆'}</button></span></div>`).join('')||'<small>No template match</small>';}
+    renderQuickTemplates();$x('#quickTemplateSearch').oninput=e=>renderQuickTemplates(e.target.value);$x('#quickTemplateList').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.openT)setT(b.dataset.openT);if(b.dataset.favT){const id=b.dataset.favT,now=LS.get('mt_favorites',[]);LS.set('mt_favorites',now.includes(id)?now.filter(x=>x!==id):[...now,id]);admin('x')}};
+    function renderHistory(){const h=LS.get('mt_script_history',[]);$x('#historyList').innerHTML=h.map((item,i)=>`<div class="tool-row"><span><b>${new Date(item.at).toLocaleString()}</b><small class="mu"> · ${esc(item.summary||'')}</small></span><button class="b g sm" data-hist="${i}">Load</button></div>`).join('')||'<small>History empty</small>';}
+    renderHistory();$x('#historyList').onclick=e=>{const b=e.target.closest('[data-hist]');if(b){const item=LS.get('mt_script_history',[])[+b.dataset.hist];if(item)setGenerated(item.script)}};
+    $x('#clearHistBtn').onclick=()=>{if(confirm('Script history clear?')){LS.set('mt_script_history',[]);admin('x')}};
+    $x('#activityList').innerHTML=activity.slice(0,50).map(a=>`<div class="tool-row"><span><b>${esc(a.action)}</b><small class="mu"> · ${new Date(a.at).toLocaleString()} · ${esc(a.user)}</small></span></div>`).join('')||'<small>Activity log empty</small>';
+    function syntaxPreview(code){let safe=esc(code);safe=safe.replace(/(^|\n)(\s*#.*)/g,'$1<span style="color:#94a3b8">$2</span>');safe=safe.replace(/(^|\n)(\s*\/[^\s]+)/g,'$1<span style="color:#67e8f9">$2</span>');safe=safe.replace(/(\b(?:add|set|remove|enable|disable|print|export|find|accept|drop|reject|dst-nat|src-nat|masquerade|blackhole)\b)/g,'<span style="color:#fbbf24">$1</span>');safe=safe.replace(/(\b(?:address|interface|name|comment|chain|action|protocol|dst-address|src-address|dst-port|to-addresses|to-ports|target|max-limit|vlan-id|router-id|remote\.as|remote\.address)=[^\s]+)/g,'<span style="color:#a5b4fc">$1</span>');return safe||' '}
+    const updatePreview=()=>{$x('#syntaxPreview').innerHTML=syntaxPreview($x('#toolGenerated').value)};updatePreview();$x('#toolGenerated').addEventListener('input',updatePreview);
+    $x('#toolCopy').onclick=copyTool;$x('#toolSave').onclick=()=>{const v=$x('#toolGenerated').value;if(v)dl('mikrotik-generated-'+new Date().toISOString().slice(0,10)+'.rsc',v)};$x('#toolClear').onclick=()=>{put('');updatePreview()};$x('#toolHistSave').onclick=()=>{const script=$x('#toolGenerated').value.trim();if(!script)return toast('Script empty');const h=LS.get('mt_script_history',[]);h.unshift({at:new Date().toISOString(),script,summary:analyzeScript(script).report.slice(0,120)});LS.set('mt_script_history',h.slice(0,100));toast('Generated script history-তে save হয়েছে')};
+    $x('#toolUndo').onclick=()=>{if(!undoStack.length)return toast('Undo history empty');redoStack.push(cloneWS(ws));ws=undoStack.pop();LS.set('mt_undo',undoStack);LS.set('mt_redo',redoStack);persist();lastCommittedWorkspace=cloneWS(ws);markHtmlDirty(true);recordActivity('Workspace Undo');toast('Undo applied');nav();setT(cur);admin('x')};
+    $x('#toolRedo').onclick=()=>{if(!redoStack.length)return toast('Redo history empty');undoStack.push(cloneWS(ws));ws=redoStack.pop();LS.set('mt_undo',undoStack);LS.set('mt_redo',redoStack);persist();lastCommittedWorkspace=cloneWS(ws);markHtmlDirty(true);recordActivity('Workspace Redo');toast('Redo applied');nav();setT(cur);admin('x')};
+  }
+  else{
+    ap.innerHTML=`<div class="help">App v${APP_VER} · Built-in pack v${ws.packVer||0} (এই file-এ v${PACK_VER}) · rev ${ws.rev||0} · ${ws.users.length} user · ${ws.tpls.length} template</div>
+<h3>Full Backup / Restore (workspace + history + favorites + activity)</h3><p class="note">Backup JSON-এ user password hash এবং template-এর secret থাকতে পারে—ফাইলটি private রাখুন।</p><div class="row"><button class="b" id="bd">Backup download (.json)</button><label class="b g" style="cursor:pointer">Restore (.json)<input type="file" id="bf" hidden accept=".json"></label></div>
+<h3>Direct HTML File Update (এক ক্লিকে মূল ফাইল আপডেট)</h3>
+<div class="row">
+  <button class="b" id="bUpdSame">💾 Select &amp; Update Same HTML File</button>
+  <button class="b g" id="be">সব user ও কোড-সহ নতুন Team edition (.html)</button>
+</div><p class="note">প্রথম লোড হওয়া মূল HTML সোর্স কোড থেকে কোনো পরিবর্তন ছাড়াই সম্পূর্ণ backup/edition ফাইল তৈরি হয়।</p>
+<h3>🌐 GitHub Live Sync (Master only)</h3>
+<p class="note">GitHub repository-তে HTML commit হবে। GitHub Pages চালু থাকলে commit-এর পর live site update হতে পারে। Token শুধু এই browser session-এ রাখা হয়, HTML-এ embed হয় না।</p>
+<div class="fg"><label><span>Repository owner / username</span><input id="ghOwner" placeholder="your-github-username"></label><label><span>Repository name</span><input id="ghRepo" placeholder="mikrotik-script-studio"></label><label><span>Branch</span><input id="ghBranch" value="main"></label><label><span>HTML file path (repo-তে)</span><input id="ghPath" value="index.html"></label><label><span>GitHub Personal Access Token (session only)</span><input id="ghToken" type="password" autocomplete="off" placeholder="ghp_… / fine-grained token"></label></div>
+<div class="row"><button class="b" id="ghSave">Save repository settings</button><button class="b g" id="ghSync">🚀 Commit current app to GitHub</button><button class="b g" id="ghForget">Forget token</button></div><div id="ghStatus" class="note" style="margin:8px 0"></div>
+<h3>Template pack import</h3><textarea id="pj" rows="4" spellcheck="false" placeholder="Pack JSON paste করুন, অথবা file / URL থেকে load করুন"></textarea>
+<div class="row"><input id="pu" placeholder="https://.../pack.json" style="flex:1;min-width:200px"><button class="b g" id="pg">URL থেকে load</button><label class="b g" style="cursor:pointer">File<input type="file" id="pf" hidden accept=".json"></label></div>
+<div class="row"><label class="tg"><input type="checkbox" id="pw"> আমার edit করা template-ও overwrite করুন</label><button class="b" id="pi">Import (merge)</button></div>
+<h3>Danger zone</h3><button class="b d" id="rs">এই device-এর সব data reset</button>`;
+    $d('#bd').onclick=()=>{const bundle={format:'MikroTikScriptStudioBackup',version:3,exportedAt:new Date().toISOString(),workspace:ws,local:{scriptHistory:LS.get('mt_script_history',[]),favorites:LS.get('mt_favorites',[]),activity:LS.get('mt_activity',[]),undo:undoStack,redo:redoStack,theme:LS.get('mt_theme','light'),basket:bk,group:grp}};dl('mikrotik-studio-full-backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(bundle,null,2));};
+    $d('#bf').onchange=e=>{const f=e.target.files[0];if(f)f.text().then(s=>{try{const o=JSON.parse(s),w=o.workspace||o;if(!Array.isArray(w.users)||!Array.isArray(w.tpls))throw 0;if(!confirm('বর্তমান workspace ও selected local data replace হবে। চালিয়ে যাবেন?'))return;
+      ws={...w,removed:w.removed||[],rev:Math.max(w.rev||0,ws.rev||0)+1};persist();if(o.local){LS.set('mt_script_history',o.local.scriptHistory||[]);LS.set('mt_favorites',o.local.favorites||[]);LS.set('mt_activity',o.local.activity||[]);undoStack=o.local.undo||[];redoStack=o.local.redo||[];LS.set('mt_undo',undoStack);LS.set('mt_redo',redoStack);LS.set('mt_theme',o.local.theme||'light');bk=o.local.basket||'';grp=o.local.group!==false;LS.set('mt_bk:'+session,bk);LS.set('mt_grp',grp);document.documentElement.dataset.theme=LS.get('mt_theme','light');sync()}lastCommittedWorkspace=cloneWS(ws);markHtmlDirty(true);recordActivity('Full JSON backup restored');toast('Full backup restore হয়েছে');if(!me())logout();else admin('b')}catch(x){alert('সঠিক backup file নয়')}})};
+    $d('#bUpdSame').onclick=()=>updateSameHtmlFile(true);
+    const ghCfg=LS.get('mt_gh_cfg',{});if($d('#ghOwner')){$d('#ghOwner').value=ghCfg.owner||'';$d('#ghRepo').value=ghCfg.repo||'';$d('#ghBranch').value=ghCfg.branch||'main';$d('#ghPath').value=ghCfg.path||'index.html';try{$d('#ghToken').value=sessionStorage.getItem('mt_gh_token')||''}catch(e){}}
+    const ghStatus=m=>$d('#ghStatus').textContent=m;
+    $d('#ghSave').onclick=()=>{const cfg={owner:$d('#ghOwner').value.trim(),repo:$d('#ghRepo').value.trim(),branch:$d('#ghBranch').value.trim()||'main',path:$d('#ghPath').value.trim()||'index.html'};if(!cfg.owner||!cfg.repo||!cfg.path)return ghStatus('Owner, repository এবং file path পূরণ করুন।');LS.set('mt_gh_cfg',cfg);try{sessionStorage.setItem('mt_gh_token',$d('#ghToken').value.trim())}catch(e){}ghStatus('Repository settings saved. Token এই session-এ রাখা হয়েছে।');toast('GitHub settings save হয়েছে')};
+    $d('#ghForget').onclick=()=>{try{sessionStorage.removeItem('mt_gh_token')}catch(e){}$d('#ghToken').value='';ghStatus('Session token cleared.')};
+    $d('#ghSync').onclick=async()=>{try{const cfg={owner:$d('#ghOwner').value.trim(),repo:$d('#ghRepo').value.trim(),branch:$d('#ghBranch').value.trim()||'main',path:$d('#ghPath').value.trim()||'index.html'},token=$d('#ghToken').value.trim();if(!cfg.owner||!cfg.repo||!cfg.path||!token)return ghStatus('Owner, repo, file path ও token পূরণ করুন।');LS.set('mt_gh_cfg',cfg);sessionStorage.setItem('mt_gh_token',token);ghStatus('GitHub repository যাচাই হচ্ছে…');const api='https://api.github.com/repos/'+encodeURIComponent(cfg.owner)+'/'+encodeURIComponent(cfg.repo)+'/contents/'+cfg.path.split('/').map(encodeURIComponent).join('/');const headers={Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};let sha=null;const existing=await fetch(api+'?ref='+encodeURIComponent(cfg.branch),{headers});if(existing.ok){const data=await existing.json();sha=data.sha}else if(existing.status!==404){const er=await existing.json().catch(()=>({message:existing.statusText}));throw new Error(er.message||'GitHub file read failed');}const src=buildUpdatedHtmlString('');const bytes=new TextEncoder().encode(src);let binary='';for(let i=0;i<bytes.length;i++)binary+=String.fromCharCode(bytes[i]);const content=btoa(binary);const payload={message:'Update MikroTik Script Studio HTML from Master panel',content,branch:cfg.branch};if(sha)payload.sha=sha;const put=await fetch(api,{method:'PUT',headers,body:JSON.stringify(payload)});if(!put.ok){const er=await put.json().catch(()=>({message:put.statusText}));throw new Error(er.message||'Commit failed');}const result=await put.json();const commitUrl=result.commit&&result.commit.html_url;ghStatus('✅ GitHub-এ commit হয়েছে'+(commitUrl?' · '+commitUrl:''));markHtmlDirty(false,'● Local save · GitHub commit synced');toast('GitHub commit সফল! Pages deploy হলে live হবে।');if(commitUrl)window.open(commitUrl,'_blank','noopener');}catch(err){ghStatus('❌ Sync failed: '+err.message);alert('GitHub Sync ব্যর্থ: '+err.message+'\\nToken permission (Contents: Read & Write) এবং repo/branch যাচাই করুন।')}};
+    $d('#be').onclick=()=>edition('');
+    $d('#pf').onchange=e=>{const f=e.target.files[0];if(f)f.text().then(s=>$d('#pj').value=s)};
+    $d('#pg').onclick=async()=>{try{const r=await fetch($d('#pu').value.trim());if(!r.ok)throw 0;$d('#pj').value=await r.text()}catch(x){alert('URL load হয়নি (network বা CORS)। File দিয়ে চেষ্টা করুন।')}};
+    $d('#pi').onclick=()=>{try{const j=JSON.parse($d('#pj').value),arr=(Array.isArray(j)?j:j.templates).filter(t=>t&&t.name&&t.body);if(!arr.length)throw 0;
+      const r=mergePack(arr.map((t,i)=>({cat:'Custom',...t,id:t.id||'p'+Date.now().toString(36)+i,pv:t.pv||j.ver||1,src:t.src||'pack'})),$d('#pw').checked);commit();toast(`+${r.a} নতুন · ${r.u} update · ${r.s} skip`);admin('b')}catch(x){alert('সঠিক pack JSON নয় (array বা {"templates":[...]})')}};
+    $d('#rs').onclick=()=>{if(confirm('সব user ও template মুছে যাবে। Backup নিয়েছেন তো?')){try{Object.keys(localStorage).filter(k=>k.startsWith('mt_')).forEach(k=>localStorage.removeItem(k));sessionStorage.clear()}catch(e){}location.reload()}}}
+  if(!d.open)d.showModal();
+  if(window.gsap) gsap.fromTo(d,{scale:.96,opacity:0},{scale:1,opacity:1,duration:.22,ease:'power2.out'});
+}
+
+/* ---------- User Form (Role Selector: Master/Regular + Per-Template Command Toggle Privilege) ---------- */
+function userForm(name){
+  const d=$('#dlg'),$d=s=>d.querySelector(s);
+  const old=ws.users.find(x=>x.u===name);
+  const isSelf = old && old.u === me().u;
+  const u=old||{u:'',name:'',role:'user',active:true,allow:{all:false,cats:[],ids:[],cmdToggleAll:false,cmdToggleIds:[]},canCreate:false,canCopy:true,canSave:true,canBasket:true,maxE:10};
+  const a=u.allow||{};
+  const on=t=>a.all||(a.cats||[]).includes(t.cat)||(a.ids||[]).includes(t.id);
+  const cmdOn=t=>a.cmdToggleAll||(a.cmdToggleIds||[]).includes(t.id);
+
+  const G={};ws.tpls.filter(t=>!t.mo).forEach(t=>(G[t.cat]=G[t.cat]||[]).push(t));
+  const multiCmdTpls = ws.tpls.filter(t=>!t.mo && bodyLinesOf(t).length > 1);
+  const ck=(id,l,v)=>`<label class="tg"><input type="checkbox" id="${id}"${v?' checked':''}> ${l}</label>`;
+
+  d.innerHTML=`<div class="dl">
+    <div class="dh"><h2>${old?'User edit: '+esc(name):'New user'}</h2><button class="x" id="ux">✕</button></div>
+    <div class="g3">
+      <label><span>Username</span><input id="fu" value="${esc(u.u)}"${old?' disabled':''}></label>
+      <label><span>Display name</span><input id="fn" value="${esc(u.name||'')}"></label>
+      <label><span>${old?'নতুন password (খালি = আগেরটাই)':'Password (min 6)'}</span><input id="fp" type="password" autocomplete="new-password"></label>
+    </div>
+
+    <div class="row" style="justify-content:space-between;background:var(--sf2);padding:10px 14px;border-radius:12px">
+      <label style="flex:1;min-width:180px">
+        <span>User Role (Master / Regular)</span>
+        <select id="frole" ${isSelf?'disabled':''}>
+          <option value="user"${u.role!=='master'?' selected':''}>Regular User (নিয়ন্ত্রিত অনুমতি)</option>
+          <option value="master"${u.role==='master'?' selected':''}>Master User (সম্পূর্ণ Admin ক্ষমতা)</option>
+        </select>
+      </label>
+      <div style="padding-top:18px">${ck('fa','Account চালু (Active)',u.active!==false)}</div>
+    </div>
+
+    <div id="regOpts" ${u.role==='master'?'hidden':''}>
+      <div class="card">
+        <b>Template access</b>
+        <div class="row" style="margin:6px 0">
+          <label class="tg"><input type="radio" name="am" value="all"${a.all?' checked':''}> সব template</label>
+          <label class="tg"><input type="radio" name="am" value="sel"${a.all?'':' checked'}> শুধু নির্বাচিত</label>
+        </div>
+        <div id="tt">${Object.entries(G).map(([c,L])=>`<details><summary><label class="tg"><input type="checkbox" data-cat="${esc(c)}"${L.every(on)?' checked':''}> ${esc(c)} (${L.length})</label></summary>${L.map(t=>`<label class="tg sub"><input type="checkbox" data-id="${esc(t.id)}"${on(t)?' checked':''}> ${esc(t.name)}</label>`).join('')}</details>`).join('')}</div>
+      </div>
+
+      <div class="card">
+        <b>⚡ Command Output Toggle Button Privilege</b>
+        <p class="note" style="margin:2px 0 8px">কোন কোন template-এ এই user প্রতিটি command আলাদাভাবে ON/OFF করার button দেখতে পাবে তা নির্ধারণ করুন:</p>
+        <div class="row" style="margin-bottom:6px">
+          <label class="tg"><input type="checkbox" id="fcmdAll"${a.cmdToggleAll?' checked':''}> সব allowed multi-command template-এ button দেখাবে</label>
+        </div>
+        <div id="cmdList" style="max-height:160px;overflow:auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:6px;padding:6px;background:var(--sf2);border-radius:10px">
+          ${multiCmdTpls.map(t=>`<label class="tg"><input type="checkbox" data-cmdid="${esc(t.id)}"${cmdOn(t)?' checked':''}> ${esc(t.name)} <small class="mu">(${bodyLinesOf(t).length} cmds)</small></label>`).join('') || '<span class="mu">একাধিক command যুক্ত কোনো template নেই</span>'}
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:0">
+        <b>Limits</b>
+        <div class="row" style="margin-top:6px">
+          ${ck('fc','নিজের template বানাতে/edit করতে পারবে',u.canCreate)}
+          ${ck('fpt','Pro Tools ব্যবহার করতে পারবে (IP Calculator, Validator, Favorites)',u.canProTools===true)}
+          ${ck('fy','Copy করতে পারবে',u.canCopy!==false)}
+          ${ck('fs','.rsc save করতে পারবে',u.canSave!==false)}
+          ${ck('fb','Basket ব্যবহার করতে পারবে',u.canBasket!==false)}
+          <label class="tg">সর্বোচ্চ entry <input id="fm" type="number" min="1" max="99" value="${u.maxE||10}" style="width:76px"></label>
+        </div>
+      </div>
+    </div>
+
+    <div id="fe" class="err"></div>
+    <div class="row"><button class="b" id="fsave">Save &amp; Sync</button><button class="b g" id="fx">Cancel</button></div>
+  </div>`;
+
+  $d('#frole').onchange = e => {
+    $d('#regOpts').hidden = e.target.value === 'master';
+  };
+
+  const tt=$d('#tt');if(tt)tt.addEventListener('change',e=>{const c=e.target.dataset.cat,g=e.target.closest('details');
+    if(c!==undefined)g.querySelectorAll('[data-id]').forEach(i=>i.checked=e.target.checked);
+    else g.querySelector('[data-cat]').checked=[...g.querySelectorAll('[data-id]')].every(i=>i.checked)});
+
+  $d('#fx').onclick=$d('#ux').onclick=()=>admin('u');
+  $d('#fsave').onclick=async()=>{
+    const er=s=>$d('#fe').textContent=s,un=old?name:$d('#fu').value.trim(),pw=$d('#fp').value;
+    if(!old){if(!/^[\w.-]{3,}$/.test(un))return er('Username কমপক্ষে ৩ অক্ষর (a-z 0-9 . _ -)');if(ws.users.some(x=>x.u===un))return er('এই username আছে');if(pw.length<6)return er('Password কমপক্ষে ৬ অক্ষর')}
+    else if(pw&&pw.length<6)return er('Password কমপক্ষে ৬ অক্ষর');
+
+    const newRole = isSelf ? 'master' : $d('#frole').value;
+    const x=old||{u:un,createdAt:new Date().toISOString().slice(0,10)};
+    x.name=$d('#fn').value.trim();
+    x.role=newRole;
+    x.active=$d('#fa').checked;
+    if(pw){x.salt=rnd();x.hash=await hashPw(pw,x.salt)}
+
+    if(newRole === 'master'){
+      x.allow = {all:true, cats:[], ids:[], cmdToggleAll:true, cmdToggleIds:[]};
+    } else {
+      const allm=d.querySelector('input[name=am]:checked').value==='all',cats=[],ids=[];
+      if(!allm)d.querySelectorAll('#tt details').forEach(g=>{const b=[...g.querySelectorAll('[data-id]')];if(b.length&&b.every(i=>i.checked))cats.push(g.querySelector('[data-cat]').dataset.cat);else b.filter(i=>i.checked).forEach(i=>ids.push(i.dataset.id))});
+      const cmdToggleAll = $d('#fcmdAll').checked;
+      const cmdToggleIds = [...d.querySelectorAll('[data-cmdid]:checked')].map(i=>i.dataset.cmdid);
+      x.allow={all:allm,cats,ids,cmdToggleAll,cmdToggleIds};
+      x.canCreate=$d('#fc').checked;x.canProTools=$d('#fpt').checked;x.canCopy=$d('#fy').checked;x.canSave=$d('#fs').checked;x.canBasket=$d('#fb').checked;x.maxE=Math.max(1,Math.min(99,+$d('#fm').value||10));
+    }
+    if(!old)ws.users.push(x);
+    commit();
+    admin('u');
+  };
+}
+
+window.addEventListener('beforeunload',e=>{if(hasUnsavedHtmlChanges){e.preventDefault();e.returnValue='HTML file sync বাকি আছে';return e.returnValue}});
+
+document.documentElement.dataset.theme=LS.get('mt_theme',matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+initThreeBG();
+initBrandLottie();
+loadWS();
+lastCommittedWorkspace=cloneWS(ws);
+markHtmlDirty(!!(seed&&JSON.stringify(ws)!==JSON.stringify(seed)),(seed&&JSON.stringify(ws)!==JSON.stringify(seed))?'● Local save loaded · embedded HTML differs; sync pending':'● Local save ready · HTML sync available');
+(session&&me()&&me().active!==false)?startApp():showLogin();
+</script></body></html>
